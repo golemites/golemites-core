@@ -1,0 +1,45 @@
+plugins {
+    id "idea"
+    id "groovy"
+    id "java-gradle-plugin"
+}
+
+/**
+ This makes IntelliJ load Gradle API Sources properly.
+ **/
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.squareup:javapoet:1.10.0'
+    compile libraries.osgi_core
+    compile libraries.integrity
+
+    compile 'com.squareup.okio:okio:1.13.0'
+
+    testCompile gradleTestKit()
+    testCompile 'junit:junit:4.12'
+    testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
+        exclude module: 'groovy-all'
+    }
+}
+
+gradlePlugin {
+    plugins {
+        featureAssemblyPlugin {
+            id = "org.tablerocket.febo.plugin"
+            implementationClass = "org.tablerocket.febo.plugin.FeboPlugin"
+        }
+    }
+}

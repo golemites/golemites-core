@@ -115,3 +115,5 @@ nb-configuration.xml
 /.gradletasknamecache
 
 */out/
+
+.vscode/

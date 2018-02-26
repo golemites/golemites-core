@@ -1,0 +1,17 @@
+ext.junitPlatformVersion = '1.1.0'
+ext.junitJupiterVersion = '5.1.0'
+ext.log4jVersion = '2.9.0'
+def integrityVersion = '0.4.0-SNAPSHOT'
+def guavaVersion = '20.0'
+def lombokVersion = '1.16.14'
+def osgiVersion = '6.0.0'
+
+rootProject.ext {
+    libraries = [
+            lombok                     : [group: "org.projectlombok", name: "lombok", version: lombokVersion, transitive: false],
+            osgi_compendium            : [group: "org.osgi", name: "osgi.cmpn", version: osgiVersion, transitive: false],
+            osgi_core                  : [group: "org.osgi", name: "org.osgi.core", version: osgiVersion, transitive: false],
+            integrity                  : [group: "org.rebaze.integrity", name: "org.rebaze.integrity.tree", version: integrityVersion, transitive: false],
+
+    ]
+}
