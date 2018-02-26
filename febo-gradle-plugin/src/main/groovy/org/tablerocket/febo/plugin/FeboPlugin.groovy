@@ -41,10 +41,15 @@ class FeboPlugin implements Plugin<Project> {
 
         // make sure that our generated src folder is part of the main source set.
         File generatedSrcDir = new File(project.buildDir, 'generated/java')
+        File generatedResourcesDir = new File(project.buildDir, 'generated/resources')
+
         def sourceSets = project.convention.getPlugin(JavaPluginConvention).sourceSets
         def versionSet = sourceSets.getByName("main") { SourceSet sourceSet ->
             sourceSet.java { SourceDirectorySet dirSet ->
                 dirSet.srcDir generatedSrcDir
+            }
+            sourceSet.resources { SourceDirectorySet dirSet ->
+                dirSet.srcDir generatedResourcesDir
             }
         }
 
@@ -56,6 +61,7 @@ class FeboPlugin implements Plugin<Project> {
         def outFile = new File(generatedSrcDir, outFilename)
 
         makeVersionClassTask.getInputs().files(sourceSets.getByName('main').allSource)
+
         makeVersionClassTask.getOutputs().file(outFile)
         if (project.getBuildFile() != null && project.getBuildFile().exists()) {
             makeVersionClassTask.getInputs().files(project.getBuildFile())
@@ -70,13 +76,14 @@ class FeboPlugin implements Plugin<Project> {
 
         // finally: configure task(s):
         project.afterEvaluate {
-            configure(project, makeVersionClassTask, extension,generatedSrcDir)
+            configure(project, makeVersionClassTask, extension,generatedSrcDir,generatedResourcesDir)
         }
     }
 
-    private void configure(Project project, GenerateStaticApiTask task, FeboExtension extension, File generatedSrcDir) {
+    private void configure(Project project, GenerateStaticApiTask task, FeboExtension extension, File generatedSrcDir,File generatedResourcesDir) {
         // configure task:
         task.packageName = extension.packageName
         task.outputLocation = generatedSrcDir
+        task.generatedResourcesDir = generatedResourcesDir
     }
 }

@@ -117,3 +117,5 @@ nb-configuration.xml
 */out/
 
 .vscode/
+
+felix-cache/

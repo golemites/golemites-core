@@ -18,7 +18,10 @@ repositories {
 }
 
 dependencies {
-    compile libraries.osgi_core
+    //compile libraries.osgi_core
+    compile libraries.tinybundles
+    compile libraries.felix
+
     compile 'com.squareup.okio:okio:1.13.0'
     testCompile 'org.assertj:assertj-core:3.9.0'
 

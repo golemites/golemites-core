@@ -32,8 +32,18 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    featureRepo
+}
+
+
 dependencies {
+    compile project(':febo-core')
     compile libraries.osgi_core
+    compile 'org.apache.felix:org.apache.felix.configadmin:1.8.16'
+    featureRepo group: 'org.apache.karaf.features', name: 'standard', version: '4.1.1', ext: 'xml', classifier: 'features'
+    runtimeOnly group: 'org.slf4j', name: 'slf4j-simple', version:'1.5.11'
+
 }
 
 
