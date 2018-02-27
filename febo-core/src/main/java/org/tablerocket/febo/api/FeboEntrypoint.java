@@ -5,6 +5,5 @@ import java.io.PrintStream;
 
 public interface FeboEntrypoint
 {
-    void execute( String[] args, InputStream in, PrintStream out,
-        PrintStream err );
+    void execute( String[] args, InputStream in, PrintStream out, PrintStream err );
 }

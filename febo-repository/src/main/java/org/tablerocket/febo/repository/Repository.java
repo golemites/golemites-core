@@ -1,10 +1,13 @@
-package org.tablerocket.febo.core;
+package org.tablerocket.febo.repository;
 
+import org.tablerocket.febo.api.Dependency;
+
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
-public class Repository
+public abstract class Repository
 {
     private final Properties index;
 
@@ -12,7 +15,19 @@ public class Repository
         this.index = data;
     }
 
-    public Dependency load(String s)
+    public Repository() {
+        index = new Properties(  );
+        try
+        {
+            index.load( Repository.class.getResourceAsStream( "/com.foo.bar.properties" ) );
+        }
+        catch ( IOException e )
+        {
+            throw new RuntimeException("Problem loading default props.",e);
+        }
+    }
+
+    public Dependency dependency(String s)
     {
         return new ResolvedDependency(s,index.getProperty( s ));
     }

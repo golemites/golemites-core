@@ -1,4 +1,4 @@
-package org.tablerocket.febo.core;
+package org.tablerocket.febo.api;
 
 import java.net.URI;
 

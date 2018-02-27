@@ -28,7 +28,7 @@ public class CompositeReadableFeatureRepository {
                 collect(desc,document.getDocumentElement());
             } catch (Exception e) {
                 throw new RuntimeException(e);
-                //LOG.warn("Potential issue with repository: " + desc + ": " + e.getMessage());
+                //LOG.warn("Potential issue require repository: " + desc + ": " + e.getMessage());
             }
         }
         return index;

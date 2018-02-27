@@ -39,6 +39,7 @@ configurations {
 
 dependencies {
     compile project(':febo-core')
+    compile project(':febo-repository')
     compile libraries.osgi_core
     compile 'org.apache.felix:org.apache.felix.configadmin:1.8.16'
     featureRepo group: 'org.apache.karaf.features', name: 'standard', version: '4.1.1', ext: 'xml', classifier: 'features'

@@ -1,8 +1,8 @@
 package org.tablerocket.febo.core;
 
-import org.apache.felix.framework.util.FelixConstants;
 import org.ops4j.io.FileUtils;
 import org.ops4j.pax.tinybundles.core.TinyBundle;
+import org.ops4j.store.Handle;
 import org.ops4j.store.Store;
 import org.ops4j.store.StoreFactory;
 import org.osgi.framework.Bundle;
@@ -12,10 +12,13 @@ import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tablerocket.febo.api.Dependency;
 import org.tablerocket.febo.api.FeboEntrypoint;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
@@ -25,20 +28,18 @@ import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 public class Febo implements AutoCloseable
 {
     public final static Logger LOG = LoggerFactory.getLogger( Febo.class );
-    private final Repository repository;
+    private LinkedHashMap<String,Handle> blobindex = new LinkedHashMap<>(  );
     private final Store<InputStream> blobstore;
     private Framework systemBundle;
 
-    private Febo(Repository repository) throws BundleException
+    private Febo() throws BundleException
     {
-        this.repository = repository;
         this.blobstore = StoreFactory.defaultStore();
-        start();
     }
 
-    public static Febo febo(Repository repo) throws BundleException
+    public static Febo febo() throws BundleException
     {
-        return new Febo(repo);
+        return new Febo();
     }
 
     public void start() throws BundleException
@@ -76,34 +77,34 @@ public class Febo implements AutoCloseable
         }
     }
 
-    @Override public void close() throws Exception
+    @Override public void close()
     {
         kill();
     }
 
-    public Febo demand( Dependency identifier )
+    public Febo require( Dependency identifier )
     {
         try
         {
-             systemBundle.getBundleContext().installBundle( identifier.identity(),identifier.location().toURL().openStream() );
+            blobindex.put(identifier.identity(),this.blobstore.store( identifier.location().toURL().openStream() ));
             return this;
         }
-        catch ( Exception e )
+        catch ( IOException e )
         {
             throw new RuntimeException(e);
         }
 
     }
 
-    public Febo install( String label, InputStream payload ) throws BundleException
+    public Febo require( String label, InputStream payload ) throws IOException
     {
-        systemBundle.getBundleContext().installBundle( label,payload );
+        blobindex.put( label,blobstore.store( payload ) );
         return this;
     }
 
-    public Febo install( String label, TinyBundle tinyBundle ) throws BundleException
+    public Febo with( String label, TinyBundle tinyBundle ) throws IOException
     {
-        install( label,tinyBundle.build(withBnd()) );
+        blobindex.put( label,blobstore.store( tinyBundle.build( withBnd() ) ) );
         return this;
     }
 
@@ -159,6 +160,10 @@ public class Febo implements AutoCloseable
     {
         try
         {
+            start();
+            for (Map.Entry<String, Handle> entry : blobindex.entrySet()) {
+                systemBundle.getBundleContext().installBundle( entry.getKey(),blobstore.load(entry.getValue()) );
+            }
             bounce();
             FeboEntrypoint entry = entrypoint( FeboEntrypoint.class );
             entry.execute( args, System.in, System.out, System.err );

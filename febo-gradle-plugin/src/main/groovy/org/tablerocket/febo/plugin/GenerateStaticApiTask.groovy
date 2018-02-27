@@ -6,7 +6,6 @@ import com.squareup.javapoet.TypeSpec
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedArtifact
-import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -14,11 +13,11 @@ import org.gradle.api.tasks.TaskAction
 import org.ops4j.pax.tinybundles.core.TinyBundle
 import org.ops4j.pax.tinybundles.core.TinyBundles
 import org.rebaze.integrity.tree.api.Tree
-import org.rebaze.integrity.tree.api.TreeBuilder
 import org.rebaze.integrity.tree.api.TreeSession
 import org.rebaze.integrity.tree.util.DefaultTreeSessionFactory
 import org.tablerocket.febo.plugin.resolver.ArtifactDescriptor
 import org.tablerocket.febo.plugin.resolver.FeatureRepositoryResolverTask
+import org.tablerocket.febo.repository.Repository
 
 import javax.lang.model.element.Modifier
 
@@ -76,6 +75,7 @@ class GenerateStaticApiTask extends DefaultTask {
 
         def compileDepBuilder = TypeSpec.classBuilder("CompileDependencies")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .superclass(Repository.class)
         for (ResolvedArtifact art : artifacts) {
             if (!art.file.exists()) continue;
             Tree tree = session.createStreamTreeBuilder().add(art.file).seal()

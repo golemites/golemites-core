@@ -1,5 +1,6 @@
 rootProject.name = 'febo'
 include "febo-core"
+include "febo-repository"
 include "febo-gradle-plugin"
 include "febo-example"
 
