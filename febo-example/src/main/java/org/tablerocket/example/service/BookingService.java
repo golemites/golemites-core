@@ -1,10 +1,11 @@
-package org.tablerocket.example;
+package org.tablerocket.example.service;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.tablerocket.example.calculator.api.Calculator;
 import org.tablerocket.febo.api.FeboEntrypoint;
 
 import java.io.InputStream;
@@ -16,6 +17,8 @@ public class BookingService implements FeboEntrypoint
     private BundleContext context;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL) String s;
+
+    @Reference Calculator calculator;
 
     @Activate
     public void activate(BundleContext ctx) {
@@ -31,5 +34,6 @@ public class BookingService implements FeboEntrypoint
     @Override public void execute( String[] args, InputStream in, PrintStream out, PrintStream err )
     {
         out.println( "Hello from Felix version " + context.getBundle( 0 ).getVersion().toString() );
+        out.println(" Sum: " + calculator.sum(2,4));
     }
 }

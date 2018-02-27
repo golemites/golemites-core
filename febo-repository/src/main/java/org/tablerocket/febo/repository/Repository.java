@@ -32,7 +32,7 @@ public abstract class Repository
         return new ResolvedDependency(s,index.getProperty( s ));
     }
 
-    private class ResolvedDependency implements Dependency
+    static class ResolvedDependency implements Dependency
     {
         private final String identity;
         private final URI location;
