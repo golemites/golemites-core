@@ -7,6 +7,7 @@ import org.ops4j.store.Store;
 import org.ops4j.store.StoreFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.util.tracker.ServiceTracker;
@@ -31,6 +32,7 @@ public class Febo implements AutoCloseable
     private LinkedHashMap<String,Handle> blobindex = new LinkedHashMap<>(  );
     private final Store<InputStream> blobstore;
     private Framework systemBundle;
+    private boolean keepRunning = false;
 
     private Febo() throws BundleException
     {
@@ -108,18 +110,25 @@ public class Febo implements AutoCloseable
         return this;
     }
 
-    private void bounce()
+    private boolean bounce()
     {
+        boolean success = true;
         for (Bundle b : systemBundle.getBundleContext().getBundles()) {
             try
             {
-                b.start();
+                String fragmentHost = b.getHeaders().get( Constants.FRAGMENT_HOST );
+                if (fragmentHost == null)
+                {
+                    b.start();
+                }
             }
             catch ( BundleException e )
             {
+                success = false;
                 LOG.warn("Unable to start bundle " + b.getSymbolicName() + " ("+e.getMessage()+")",e);
             }
         }
+        return success;
     }
 
     private <T> T entrypoint( Class<T> entryClass )
@@ -156,20 +165,32 @@ public class Febo implements AutoCloseable
      * By this time, dependencies must have met and the entrypoint must be reachable.
      * Otherwise this will raise an exception.
      */
-    public void run(String[] args) throws Exception
+    public synchronized void run(String[] args) throws Exception
     {
+        boolean success = false;
         try
         {
             start();
             for (Map.Entry<String, Handle> entry : blobindex.entrySet()) {
                 systemBundle.getBundleContext().installBundle( entry.getKey(),blobstore.load(entry.getValue()) );
             }
-            bounce();
-            FeboEntrypoint entry = entrypoint( FeboEntrypoint.class );
-            entry.execute( args, System.in, System.out, System.err );
+            success = bounce();
+            if (success)
+            {
+                FeboEntrypoint entry = entrypoint( FeboEntrypoint.class );
+                entry.execute( args, System.in, System.out, System.err );
+            }
         }finally
         {
-            close();
+            if (!success || !keepRunning)
+            {
+                close();
+            }
         }
+    }
+
+    public Febo keepRunning(boolean keepRunning) {
+        this.keepRunning = keepRunning;
+        return this;
     }
 }

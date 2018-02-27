@@ -12,6 +12,8 @@ public class App
     {
         CompileDependencies repo = new CompileDependencies();
 
+        // TODO: Strip version numbers if dependency is unique.
+        // TODO: make dependency(String) param type-safe to that repo instance (e.g. via a unique subclass type)
         febo()
             .require( repo.dependency(CompileDependencies.ORG_APACHE_FELIX_CONFIGADMIN_1_8_16))
             .require( repo.dependency( RepositoryDependencies.ORG_APACHE_FELIX_SCR_2_0_8 ) )
