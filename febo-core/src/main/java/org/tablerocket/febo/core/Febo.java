@@ -84,11 +84,15 @@ public class Febo implements AutoCloseable
         kill();
     }
 
-    public Febo require( Dependency identifier )
+    public Febo require( Dependency... identifiers )
     {
         try
         {
-            blobindex.put(identifier.identity(),this.blobstore.store( identifier.location().toURL().openStream() ));
+            for (Dependency identifier : identifiers)
+            {
+                blobindex.put( identifier.identity(),
+                    this.blobstore.store( identifier.location().toURL().openStream() ) );
+            }
             return this;
         }
         catch ( IOException e )

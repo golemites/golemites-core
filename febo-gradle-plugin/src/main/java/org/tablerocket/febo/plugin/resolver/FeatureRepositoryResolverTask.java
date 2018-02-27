@@ -85,7 +85,7 @@ public class FeatureRepositoryResolverTask {
             }
         }
         if (givenRepos.size() == 0) {
-            throw new GradleException("There is no valid karaf repository set up for configuration " + INPUT_CONFIG);
+          //  throw new GradleException("There is no valid karaf repository set up for configuration " + INPUT_CONFIG);
         }
         return givenRepos;
     }
@@ -117,7 +117,7 @@ public class FeatureRepositoryResolverTask {
         return dep;
     }
 
-    protected File resolveSingle(ArtifactDescriptor artifact) {
+    public File resolveSingle(ArtifactDescriptor artifact) {
         String cname = "featureRepoDynamic_" + artifact.getGroup() + "_" + artifact.getName() + "_" + artifact.getClassifier() + "_" + artifact.getVersion();
         Configuration dynamicFeatureRepos = getProject().getConfigurations().findByName(cname);
         if (dynamicFeatureRepos == null) {

@@ -45,6 +45,10 @@ public class ArtifactDescriptor
         this.resolver = resolver;
     }
 
+    public ArtifactDescriptor(File file) {
+        this.resolver = (desc) -> file;
+    }
+
     public static ArtifactDescriptor parseGAV(String incoming, SingleArtifactResolver resolver) {
         System.out.println("Resolving " + incoming);
         int offset = incoming.indexOf(":mvn:");

@@ -2,6 +2,7 @@ package org.tablerocket.febo.plugin
 
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
+import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -15,6 +16,7 @@ import org.ops4j.pax.tinybundles.core.TinyBundles
 import org.rebaze.integrity.tree.api.Tree
 import org.rebaze.integrity.tree.api.TreeSession
 import org.rebaze.integrity.tree.util.DefaultTreeSessionFactory
+import org.tablerocket.febo.api.Dependency
 import org.tablerocket.febo.plugin.resolver.ArtifactDescriptor
 import org.tablerocket.febo.plugin.resolver.FeatureRepositoryResolverTask
 import org.tablerocket.febo.repository.Repository
@@ -57,15 +59,25 @@ class GenerateStaticApiTask extends DefaultTask {
         def now = '' //new Date() disabled as it would nuke the build-cache + up to date checks.
         outputLocation.mkdirs()
 
-        // Static compile dependencies as java:
-        createCompileDependenciesApiClazz(project, session, p)
 
-        Set<ArtifactDescriptor> karafRepoArtifacts = new FeatureRepositoryResolverTask().loadArtifactsTransitively(project)
-        createCompileDependenciesApiClazz(project, session, p,karafRepoArtifacts)
+        Set<ArtifactDescriptor> artifacts = new FeatureRepositoryResolverTask().loadArtifactsTransitively(project)
+
+        def localArt = project.configurations.getByName("compile").resolvedConfiguration.resolvedArtifacts
+        for (ResolvedArtifact art : localArt) {
+            ArtifactDescriptor desc = new ArtifactDescriptor(art.file)
+            desc.name = art.name
+            desc.group = art.moduleVersion.id.group
+            desc.extension = art.extension
+            desc.type = art.type
+            desc.version = art.moduleVersion.id.version
+            artifacts.add(desc)
+        }
+
+        createCompileDependenciesApiClazz(project, session, p,artifacts)
 
         // Store the very blobstore index for now in a plain file here:
         // TODO: Fix this location as this file will not be copied.
-        File db = new File(generatedResourcesDir,packageName + ".properties");
+        File db = new File(generatedResourcesDir,"febo-blobs.properties");
         db.getParentFile().mkdirs();
         p.store(new FileWriter(db),"")
     }
@@ -95,25 +107,96 @@ class GenerateStaticApiTask extends DefaultTask {
     }
 
     private createCompileDependenciesApiClazz(Project project, TreeSession session, Properties p,Set<ArtifactDescriptor> karafRepoArtifacts) {
-        def compileDepBuilder = TypeSpec.classBuilder("RepositoryDependencies")
+        def compileDepBuilder = TypeSpec.classBuilder("FeboRepository")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-
-
+                .superclass(Repository.class)
+        Map<String,ArtifactDescriptor> index = new HashMap<>();
         for (ArtifactDescriptor art : karafRepoArtifacts) {
+            if ((art.resolve() == null || !art.resolve().exists())) continue
+            String name = getNameFor(art)
+            String version = typesafer(getVersionFor(art))
+            ArtifactDescriptor given = index.get(name)
+            if (given != null) {
+                // clash. Fix it.
+                String otherVersion = typesafer(getVersionFor(given))
+                index.put(name + "_" + otherVersion, given)
+                index.put(name + "_" + version,art)
+            }else {
+                index.put(name,art)
+            }
+        }
+
+        for (String name : index.keySet()) {
+            ArtifactDescriptor art = index.get(name)
             Tree tree = session.createStreamTreeBuilder().add(art.resolve()).seal()
-
-            String name = getNameFor(art.resolve(),art.name).toUpperCase()
-
-            def fieldSpec = FieldSpec.builder(String.class, name
-            ).addModifiers(Modifier.FINAL, Modifier.PUBLIC, Modifier.STATIC)
+            def methodSpec = MethodSpec.methodBuilder(name)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(Dependency.class)
+                    .addStatement('return dependency($S)',tree.fingerprint())
+                    .build()
+            /**
+            def fieldSpec = FieldSpec.builder(String.class, name).addModifiers(Modifier.FINAL, Modifier.PUBLIC)
                     .initializer('$S', tree.fingerprint())
                     .build()
-            p.put(tree.fingerprint(), art.file.absolutePath)
-            compileDepBuilder.addField(fieldSpec)
+         **/
+            p.put(tree.fingerprint(), art.resolve().absolutePath)
+           // compileDepBuilder.addField(fieldSpec)
+            compileDepBuilder.addMethod(methodSpec)
+
         }
 
         JavaFile javaFile = JavaFile.builder(packageName, compileDepBuilder.build()).build()
         javaFile.writeTo(outputLocation)
+    }
+
+    private static String getNameFor(ArtifactDescriptor art) {
+        File file = art.resolve()
+        String name = art.name
+
+        new FileInputStream(file).withCloseable {
+            fis ->
+                TinyBundle tb = TinyBundles.bundle().read(fis)
+                if (fis != null) {
+                    String bsn = tb.getHeader("Bundle-SymbolicName");
+                    String version = tb.getHeader("Bundle-Version");
+
+                    if (bsn != null) {
+                        // fix any extra props:
+                        int cap = bsn.indexOf(";")
+                        if (cap >= 0) {
+                            bsn = bsn.substring(0, cap)
+                        }
+
+                        if (version != null) {
+                            return typesafer(bsn)
+                        } else {
+                            return typesafer(bsn)
+                        }
+                    }
+
+                }
+                return typesafer(name)
+        }
+    }
+
+    private static String getVersionFor(ArtifactDescriptor art) {
+        File file = art.resolve()
+
+        new FileInputStream(file).withCloseable {
+            fis ->
+                TinyBundle tb = TinyBundles.bundle().read(fis)
+                if (fis != null) {
+                    String version = tb.getHeader("Bundle-Version");
+                    if (version != null) {
+                        return version
+                    }
+                }
+                if (art.version != null) {
+                    return art.version
+                }else {
+                    throw new IllegalArgumentException("Art " + art.name + " has null version.. " + art.resolve().getAbsolutePath())
+                }
+        }
     }
 
     private static String getNameFor(File file, String name) {

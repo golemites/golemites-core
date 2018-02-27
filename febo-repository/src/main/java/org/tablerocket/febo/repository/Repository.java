@@ -19,7 +19,7 @@ public abstract class Repository
         index = new Properties(  );
         try
         {
-            index.load( Repository.class.getResourceAsStream( "/com.foo.bar.properties" ) );
+            index.load( Repository.class.getResourceAsStream( "/febo-blobs.properties" ) );
         }
         catch ( IOException e )
         {
