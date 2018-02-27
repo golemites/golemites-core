@@ -14,6 +14,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tablerocket.febo.api.Dependency;
+import org.tablerocket.febo.api.DelayedBuilder;
 import org.tablerocket.febo.api.FeboEntrypoint;
 
 import java.io.File;
@@ -84,7 +85,14 @@ public class Febo implements AutoCloseable
         kill();
     }
 
+    public Febo require( DelayedBuilder<Dependency> delayed )
+    {
+        require( delayed.build() );
+        return this;
+    }
+
     public Febo require( Dependency... identifiers )
+
     {
         try
         {

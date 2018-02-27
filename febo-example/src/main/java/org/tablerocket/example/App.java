@@ -4,7 +4,6 @@ import org.tablerocket.example.calculator.CalculatorBundle;
 import org.tablerocket.example.service.ExampleBundle;
 import org.tablerocket.febo.repository.AutoBundleSupport;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
 import static org.tablerocket.febo.core.Febo.febo;
 
 public class App
@@ -19,7 +18,7 @@ public class App
             .require( repo.org_apache_felix_configadmin() )
             .require( repo.org_apache_felix_scr() )
             .require( autoBundle.from( ExampleBundle.class ) )
-            .require( autoBundle.from( CalculatorBundle.class ) )
+            .require( autoBundle.from( CalculatorBundle.class ).withAutoExportApi( true ) )
 
             //.with( "booking", bundle().add( BookingService.class ) )
             .run( args );
