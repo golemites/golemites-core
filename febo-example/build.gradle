@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'org.tablerocket.febo.plugin'
 
 febo {
-    packageName 'com.foo.bar'
+    packageName 'org.tablerocket.example'
 }
 
 compileJava {
