@@ -1,4 +1,4 @@
-package org.tablerocket.febo.repository;
+package org.tablerocket.febo.autobundle;
 
 import java.io.IOException;
 import java.net.URL;

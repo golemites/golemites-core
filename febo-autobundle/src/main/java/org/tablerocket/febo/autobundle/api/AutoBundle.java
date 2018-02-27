@@ -1,4 +1,4 @@
-package org.tablerocket.febo.repository.api;
+package org.tablerocket.febo.autobundle.api;
 
 import java.lang.annotation.*;
 

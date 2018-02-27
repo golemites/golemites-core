@@ -1,4 +1,4 @@
-package org.tablerocket.febo.repository;
+package org.tablerocket.febo.autobundle;
 
 import org.ops4j.pax.tinybundles.core.TinyBundle;
 import org.ops4j.store.Handle;
