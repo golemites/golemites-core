@@ -40,6 +40,10 @@ class StaticApiGeneratorTaskTest extends Specification {
             mavenCentral()
         }
         
+        configurations {
+            featureRepo
+         }
+        
         dependencies {
         }
         
@@ -60,6 +64,6 @@ class StaticApiGeneratorTaskTest extends Specification {
 
         then:
         result.task(":generateStaticApi").outcome == SUCCESS
-        new File(buildFile.parentFile,"build/generated/java/com/foo/bar/BuildVersion.java").exists()
+        new File(buildFile.parentFile,"build/generated/java/com/foo/bar/FeboRepository.java").exists()
     }
 }

@@ -36,6 +36,10 @@ configurations {
     featureRepo
 }
 
+test {
+    useJUnitPlatform()
+}
+
 
 dependencies {
     compile project(':febo-core')
@@ -47,6 +51,14 @@ dependencies {
     //featureRepo group: 'org.apache.karaf.features', name: 'standard', version: '4.1.5', ext: 'xml', classifier: 'features'
     runtimeOnly group: 'org.slf4j', name: 'slf4j-simple', version:'1.5.11'
 
+    testCompile 'org.assertj:assertj-core:3.9.0'
+
+    // JUnit Jupiter API and TestEngine implementation
+    testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+
+    // To avoid compiler warnings about @API annotations in JUnit code
+    testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
 }
 
 

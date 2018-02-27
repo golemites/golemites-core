@@ -144,7 +144,8 @@ public class Febo implements AutoCloseable
             catch ( BundleException e )
             {
                 success = false;
-                LOG.warn("Unable to start bundle " + b.getSymbolicName() + " ("+e.getMessage()+")",e);
+                throw new RuntimeException("Unable to start bundle " + b.getSymbolicName() + " ("+e.getMessage()+")",e);
+
             }
         }
         return success;
