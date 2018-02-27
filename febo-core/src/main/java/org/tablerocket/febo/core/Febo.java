@@ -47,10 +47,7 @@ public class Febo implements AutoCloseable
 
     public void start() throws BundleException
     {
-        System.out.println(" ____  ____  ____   __  \n"
-            + "(  __)(  __)(  _ \\ /  \\ \n"
-            + " ) _)  ) _)  ) _ ((  O )\n"
-            + "(__)  (____)(____/ \\__/ \n");
+
 
         FileUtils.delete( new File("felix-cache") );
 
@@ -66,6 +63,16 @@ public class Febo implements AutoCloseable
         Map<String,String> configuration = (Map) p;
         systemBundle = factory.newFramework(configuration);
         systemBundle.init();
+
+        System.out.println("\u001B[36m ____  ____  ____   __  \n"
+            + "(  __)(  __)(  _ \\ /  \\ \n"
+            + " ) _)  ) _)  ) _ ((  O )\n"
+            + "(__)  (____)(____/ \\__/ \u001B[0m \u001B[0m\n");
+
+        String version = systemBundle.getHeaders().get( Constants.BUNDLE_VERSION );
+
+        System.out.println("\u001B[36mInitialized Febo running on Apache Felix "+version+"\u001B[0m \u001B[0m\r\n");
+
         systemBundle.start();
     }
 
