@@ -1,10 +1,9 @@
 package org.tablerocket.febo.repository;
 
 import org.tablerocket.febo.api.Dependency;
+import org.tablerocket.febo.core.ResolvedDependency;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Properties;
 
 public abstract class Repository
@@ -29,41 +28,6 @@ public abstract class Repository
 
     public Dependency dependency(String s)
     {
-        return new ResolvedDependency(s,index.getProperty( s ));
-    }
-
-    static class ResolvedDependency implements Dependency
-    {
-        private final String identity;
-        private final URI location;
-
-        public ResolvedDependency( String key, String location )
-        {
-            this.identity = key;
-            try
-            {
-                if (location.startsWith( "/" )) {
-                    this.location = new URI( "file://" + location );
-
-                }else
-                {
-                    this.location = new URI( location );
-                }
-            }
-            catch ( URISyntaxException e )
-            {
-                throw new RuntimeException( "Bad url? (got: " + location + ")",e );
-            }
-        }
-
-        @Override public String identity()
-        {
-            return identity;
-        }
-
-        @Override public URI location()
-        {
-            return location;
-        }
+        return new ResolvedDependency(s,ResolvedDependency.parseLocation( index.getProperty( s )));
     }
 }

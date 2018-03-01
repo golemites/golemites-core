@@ -40,7 +40,6 @@ test {
     useJUnitPlatform()
 }
 
-
 dependencies {
     compile project(':febo-core')
     compile project(':febo-repository')

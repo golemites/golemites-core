@@ -6,11 +6,11 @@ import org.ops4j.store.Store;
 import org.osgi.framework.Constants;
 import org.tablerocket.febo.api.DelayedBuilder;
 import org.tablerocket.febo.api.Dependency;
+import org.tablerocket.febo.core.ResolvedDependency;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -98,25 +98,7 @@ public class AutoBundleSupport
                 Store<InputStream> store = getDefaultStore();
                 Handle handle = store.store( bundle.build( withBnd() ) );
 
-                return new Dependency()
-                {
-                    @Override public String identity()
-                    {
-                        return name;
-                    }
-
-                    @Override public URI location()
-                    {
-                        try
-                        {
-                            return store.getLocation( handle );
-                        }
-                        catch ( IOException e )
-                        {
-                            throw new RuntimeException( e );
-                        }
-                    }
-                };
+                return new ResolvedDependency(name,store.getLocation( handle ));
             }
             catch ( IOException e )
             {
