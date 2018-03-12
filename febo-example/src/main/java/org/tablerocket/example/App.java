@@ -3,6 +3,7 @@ package org.tablerocket.example;
 import org.tablerocket.example.calculator.CalculatorBundle;
 import org.tablerocket.example.service.ExampleBundle;
 import org.tablerocket.febo.autobundle.AutoBundleSupport;
+import org.tablerocket.febo.repository.ClasspathRepositoryStore;
 
 import static org.tablerocket.febo.core.Febo.febo;
 
@@ -14,7 +15,7 @@ public class App
     public static void main( String[] args ) throws Exception
     {
         // Optional concept from febo-repository giving static access to bundle resources loaded by gradle plugin.
-        FeboRepository repo = new FeboRepository();
+        FeboRepository repo = new FeboRepository(new ClasspathRepositoryStore());
 
         // Optional concept from febo-autobundle allowing bundleization of parts of the classpath from here based on convention.
         AutoBundleSupport autoBundle = new AutoBundleSupport();

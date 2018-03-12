@@ -3,8 +3,8 @@ package org.tablerocket.example.calculator;
 import org.junit.jupiter.api.Test;
 import org.tablerocket.example.FeboRepository;
 import org.tablerocket.example.mytest.MyTestEntry;
-import org.tablerocket.example.service.ExampleBundle;
 import org.tablerocket.febo.autobundle.AutoBundleSupport;
+import org.tablerocket.febo.repository.ClasspathRepositoryStore;
 
 import static org.tablerocket.febo.core.Febo.febo;
 
@@ -14,7 +14,7 @@ public class CalcTest
     @Test
     public void simpleTest() throws Exception
     {
-        FeboRepository repo = new FeboRepository();
+        FeboRepository repo = new FeboRepository(new ClasspathRepositoryStore());
 
         // Optional concept from febo-autobundle allowing bundleization of parts of the classpath from here based on convention.
         AutoBundleSupport autoBundle = new AutoBundleSupport();

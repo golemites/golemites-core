@@ -19,7 +19,7 @@ import org.rebaze.integrity.tree.util.DefaultTreeSessionFactory
 import org.tablerocket.febo.api.Dependency
 import org.tablerocket.febo.plugin.resolver.ArtifactDescriptor
 import org.tablerocket.febo.plugin.resolver.FeatureRepositoryResolverTask
-import org.tablerocket.febo.repository.Repository
+import org.tablerocket.febo.repository.RepositoryStore
 
 import javax.lang.model.element.Modifier
 
@@ -76,40 +76,24 @@ class GenerateStaticApiTask extends DefaultTask {
         createCompileDependenciesApiClazz(project, session, p,artifacts)
 
         // Store the very blobstore index for now in a plain file here:
-        // TODO: Fix this location as this file will not be copied.
         File db = new File(generatedResourcesDir,"febo-blobs.properties");
         db.getParentFile().mkdirs();
         p.store(new FileWriter(db),"")
     }
 
-    private createCompileDependenciesApiClazz(Project project, TreeSession session, Properties p) {
-        def artifacts = project.configurations.getByName("compile").resolvedConfiguration.resolvedArtifacts
-
-        def compileDepBuilder = TypeSpec.classBuilder("CompileDependencies")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .superclass(Repository.class)
-        for (ResolvedArtifact art : artifacts) {
-            if (!art.file.exists()) continue;
-            Tree tree = session.createStreamTreeBuilder().add(art.file).seal()
-            String name = getNameFor(art.file,art.name).toUpperCase()
-
-            def fieldSpec = FieldSpec.builder(String.class, name)
-                    .addModifiers(Modifier.FINAL, Modifier.PUBLIC,Modifier.STATIC)
-                    .initializer('$S', tree.fingerprint())
-                    .build()
-            p.put(tree.fingerprint(), art.file.absolutePath)
-            compileDepBuilder.addField(fieldSpec)
-        }
-
-
-        JavaFile javaFile = JavaFile.builder(packageName, compileDepBuilder.build()).build()
-        javaFile.writeTo(outputLocation)
-    }
-
     private createCompileDependenciesApiClazz(Project project, TreeSession session, Properties p,Set<ArtifactDescriptor> karafRepoArtifacts) {
+
         def compileDepBuilder = TypeSpec.classBuilder("FeboRepository")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .superclass(Repository.class)
+                //.superclass(Repository.class)
+                .addField(FieldSpec.builder(RepositoryStore.class,"backend").addModifiers(Modifier.FINAL,Modifier.PRIVATE)
+                .build())
+                .addMethod(MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(RepositoryStore.class, "backend")
+                .addStatement('this.$N = $N', "backend", "backend")
+                .build())
+
         Map<String,ArtifactDescriptor> index = new HashMap<>();
         for (ArtifactDescriptor art : karafRepoArtifacts) {
             if ((art.resolve() == null || !art.resolve().exists())) continue
@@ -132,7 +116,7 @@ class GenerateStaticApiTask extends DefaultTask {
             def methodSpec = MethodSpec.methodBuilder(name)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(Dependency.class)
-                    .addStatement('return dependency($S)',tree.fingerprint())
+                    .addStatement('return this.backend.resolve($S)',tree.value().hash())
                     .build()
             /**
             def fieldSpec = FieldSpec.builder(String.class, name).addModifiers(Modifier.FINAL, Modifier.PUBLIC)
