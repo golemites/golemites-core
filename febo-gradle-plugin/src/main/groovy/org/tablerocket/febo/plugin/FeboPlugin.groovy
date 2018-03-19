@@ -15,11 +15,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-/* This build script was forked from Apache Polygene. */
+/* Based on a forked buildscript from Apache Polygene. */
 package org.tablerocket.febo.plugin
 
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -28,16 +29,19 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.util.GradleVersion
 
-// TODO:release:perf Placeholder for date for dev versions
-// TODO:release:perf Add git data, placeholders for dev versions
 @CompileStatic
 class FeboPlugin implements Plugin<Project> {
 
     void apply(Project project) {
+        verifyGradleVersion()
         project.getPlugins().apply(JavaPlugin.class)
         def extension = project.extensions.create("febo",FeboExtension, project)
+
         Task makeVersionClassTask = project.tasks.create( 'generateStaticApi', GenerateStaticApiTask.class)
+        Task feboJar = project.tasks.create( 'feboJar', FeboJarTask.class)
+
 
         // make sure that our generated src folder is part of the main source set.
         File generatedSrcDir = new File(project.buildDir, 'generated/java')
@@ -77,6 +81,13 @@ class FeboPlugin implements Plugin<Project> {
         // finally: configure task(s):
         project.afterEvaluate {
             configure(project, makeVersionClassTask, extension,generatedSrcDir,generatedResourcesDir)
+        }
+    }
+
+    private void verifyGradleVersion() {
+        if (GradleVersion.current() < GradleVersion.version("4.0")) {
+            throw new GradleException("Febo plugin requires Gradle 4.0 or later."
+                    + " The current version is " + GradleVersion.current());
         }
     }
 

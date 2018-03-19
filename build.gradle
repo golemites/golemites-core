@@ -7,6 +7,7 @@ buildscript {
     dependencies {
         classpath "org.junit.platform:junit-platform-gradle-plugin:${junitPlatformVersion}"
 		classpath "com.vanniktech:gradle-dependency-graph-generator-plugin:0.2.0"
+		classpath 'org.dm.gradle:gradle-bundle-plugin:0.10.0'
 	}
 }
 
@@ -22,6 +23,14 @@ allprojects {
 }
 
 subprojects {
+	if (new File("$project.projectDir/bnd.bnd").exists()) {
+		apply plugin: 'org.dm.bundle'
+		bundle {
+			instruction '-include', 'bnd.bnd'
+			failOnError = true
+		}
+	}
+
 	apply plugin: 'maven'
 
 	repositories {

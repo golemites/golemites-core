@@ -5,6 +5,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.sample.coder.MyService;
 import org.tablerocket.example.calculator.api.Calculator;
 import org.tablerocket.febo.api.FeboEntrypoint;
 
@@ -20,6 +21,8 @@ public class BookingService implements FeboEntrypoint
 
     @Reference Calculator calculator;
 
+    @Reference MyService service;
+
     @Activate
     public void activate(BundleContext ctx) {
         this.context = ctx;
@@ -34,6 +37,8 @@ public class BookingService implements FeboEntrypoint
     @Override public void execute( String[] args, InputStream in, PrintStream out, PrintStream err )
     {
         out.println( "Hello from Felix version " + context.getBundle( 0 ).getVersion().toString() );
-        out.println(" Sum: " + calculator.sum(2,4));
+        out.println(" Sum: " + calculator.sum(2,4) );
+        out.println(" MyService: " + service.magic() );
+
     }
 }

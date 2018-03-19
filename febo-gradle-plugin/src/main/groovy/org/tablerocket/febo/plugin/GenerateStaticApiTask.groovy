@@ -64,6 +64,7 @@ class GenerateStaticApiTask extends DefaultTask {
 
         def localArt = project.configurations.getByName("compile").resolvedConfiguration.resolvedArtifacts
         for (ResolvedArtifact art : localArt) {
+            getLogger().warn("Found " + art.id.displayName + " file: " + art.file + " exists: " + art.file.exists())
             ArtifactDescriptor desc = new ArtifactDescriptor(art.file)
             desc.name = art.name
             desc.group = art.moduleVersion.id.group
@@ -96,7 +97,11 @@ class GenerateStaticApiTask extends DefaultTask {
 
         Map<String,ArtifactDescriptor> index = new HashMap<>();
         for (ArtifactDescriptor art : karafRepoArtifacts) {
-            if ((art.resolve() == null || !art.resolve().exists())) continue
+            //getLogger().warn(" + " + art.name)
+            if ((art.resolve() == null || !art.resolve().exists())) {
+                getLogger().warn(" - " + art.name + " bad because not existing: " + art.resolve())
+                continue
+            }
             String name = getNameFor(art)
             String version = typesafer(getVersionFor(art))
             ArtifactDescriptor given = index.get(name)
@@ -123,7 +128,7 @@ class GenerateStaticApiTask extends DefaultTask {
                     .initializer('$S', tree.fingerprint())
                     .build()
          **/
-            p.put(tree.fingerprint(), art.resolve().absolutePath)
+            p.put(tree.value().hash(), art.resolve().absolutePath)
            // compileDepBuilder.addField(fieldSpec)
             compileDepBuilder.addMethod(methodSpec)
 

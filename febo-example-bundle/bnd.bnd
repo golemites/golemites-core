@@ -1,0 +1,3 @@
+Bundle-SymbolicName: febo-example-bundle
+Export-Package: org.sample.coder
+Import-Package: *

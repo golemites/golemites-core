@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.ops4j.pax.tinybundles.core.TinyBundles.*;
+import static org.tablerocket.febo.autobundle.Util.findClassesFolder;
 
 public class AutoBundleSupport
 {
@@ -28,17 +29,28 @@ public class AutoBundleSupport
     public static class AutoBundleSpec implements DelayedBuilder<Dependency>
     {
         private final Class<?> clazz;
+        private final Set<File> roots;
         private boolean autoExportApi = true;
+        private boolean trimToPrefix = true;
+
         private Map<String, String> headerBnd = new HashMap<>();
 
         public AutoBundleSpec( Class<?> clazz )
         {
             this.clazz = clazz;
+            this.roots = null;
+
         }
 
         public AutoBundleSpec withAutoExportApi( boolean yes )
         {
             this.autoExportApi = yes;
+            return this;
+        }
+
+        public AutoBundleSpec trimToPrefix( boolean yes )
+        {
+            this.trimToPrefix = yes;
             return this;
         }
 
@@ -52,16 +64,15 @@ public class AutoBundleSupport
         {
             try
             {
-                ContentCollector collector = selectCollector( clazz );
-                Map<String, URL> map = new HashMap<>();
-                collector.collect( map );
+                Map<String, URL> map = findResources();
 
                 String name = clazz.getPackage().getName();
                 String prefix = name.replaceAll( "\\.", "/" );
                 // then filter out the desired content:
 
+
                 List<Map.Entry<String, URL>> list = map.entrySet().stream().filter(
-                    entry -> entry.getKey().startsWith( prefix )
+                    entry -> !trimToPrefix || entry.getKey().startsWith( prefix )
                 ).collect( Collectors.toList() );
 
                 TinyBundle bundle = bundle().set( Constants.BUNDLE_SYMBOLICNAME, name );
@@ -106,6 +117,14 @@ public class AutoBundleSupport
             }
         }
 
+        private Map<String, URL> findResources() throws IOException
+        {
+            ContentCollector collector = selectCollector( clazz );
+            Map<String, URL> map = new HashMap<>();
+            collector.collect( map );
+            return map;
+        }
+
         private ContentCollector selectCollector( Class<?> anchor ) throws IOException
         {
             File root = findClassesFolder( anchor );
@@ -118,38 +137,6 @@ public class AutoBundleSupport
             else
             {
                 return new CollectFromItems( anchor );
-            }
-        }
-
-        static String convertClassToPath( Class<?> c )
-        {
-            return c.getName().replace( ".", File.separator ) + ".class";
-        }
-
-        public static File findClassesFolder( Class<?> clazz ) throws IOException
-        {
-            ClassLoader classLoader = clazz.getClassLoader();
-            String clazzPath = convertClassToPath( clazz );
-            URL url = classLoader.getResource( clazzPath );
-            if ( url == null || !"file".equals( url.getProtocol() ) )
-            {
-                return null;
-            }
-            else
-            {
-                try
-                {
-                    File file = new File( url.toURI() );
-                    String fullPath = file.getCanonicalPath();
-                    String parentDirPath = fullPath
-                        .substring( 0, fullPath.length() - clazzPath.length() );
-                    return new File( parentDirPath );
-                }
-                catch ( URISyntaxException e )
-                {
-                    // this should not happen as the uri was obtained from getResource
-                    throw new RuntimeException( e );
-                }
             }
         }
 

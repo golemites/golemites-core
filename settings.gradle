@@ -3,5 +3,6 @@ include "febo-core"
 include "febo-repository"
 include "febo-autobundle"
 include "febo-gradle-plugin"
+include "febo-example-bundle"
 include "febo-example"
 

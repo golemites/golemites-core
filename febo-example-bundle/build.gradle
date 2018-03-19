@@ -1,0 +1,19 @@
+plugins {
+    id 'java-library'
+    id 'maven'
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.compilerArgs += '-parameters'
+}
+
+compileTestJava {
+		options.compilerArgs += '-parameters'
+}
+
+dependencies {
+    compile libraries.osgi_core
+    compile libraries.osgi_compendium
+}

@@ -44,6 +44,7 @@ dependencies {
     compile project(':febo-core')
     compile project(':febo-repository')
     compile project(':febo-autobundle')
+    compile project(':febo-example-bundle')
     compile libraries.osgi_core
     compile 'org.apache.felix:org.apache.felix.configadmin:1.8.16'
     compile 'org.apache.felix:org.apache.felix.scr:2.0.14'
