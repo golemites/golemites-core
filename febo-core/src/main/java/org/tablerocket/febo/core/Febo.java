@@ -1,6 +1,6 @@
 package org.tablerocket.febo.core;
 
-import org.ops4j.io.FileUtils;
+import aQute.lib.io.IO;
 import org.ops4j.pax.tinybundles.core.TinyBundle;
 import org.ops4j.store.Handle;
 import org.ops4j.store.Store;
@@ -47,9 +47,7 @@ public class Febo implements AutoCloseable
 
     public void start() throws BundleException
     {
-
-
-        FileUtils.delete( new File("felix-cache") );
+        IO.delete( new File("felix-cache") );
 
         FrameworkFactory factory = ServiceLoader.load( FrameworkFactory.class ).iterator().next();
 
