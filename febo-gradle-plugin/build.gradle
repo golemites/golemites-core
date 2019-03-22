@@ -2,6 +2,7 @@ plugins {
     id "idea"
     id "groovy"
     id "java-gradle-plugin"
+    id "io.freefair.lombok" version "3.1.4"
 }
 
 /**
@@ -26,7 +27,6 @@ dependencies {
     compile 'com.squareup:javapoet:1.10.0'
     compile libraries.osgi_core
     compile libraries.integrity
-    compile libraries.lombok
     compile libraries.tinybundles
 
 

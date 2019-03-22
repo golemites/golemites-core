@@ -23,6 +23,7 @@ dependencies {
     compile libraries.felix
     compile libraries.lombok
 
+    implementation 'com.google.guava:guava:27.1-jre'
 
     compile 'com.squareup.okio:okio:1.13.0'
     testCompile 'org.assertj:assertj-core:3.9.0'

@@ -7,12 +7,12 @@ buildscript {
     dependencies {
         classpath "org.junit.platform:junit-platform-gradle-plugin:${junitPlatformVersion}"
 		classpath "com.vanniktech:gradle-dependency-graph-generator-plugin:0.2.0"
-		classpath 'org.dm.gradle:gradle-bundle-plugin:0.10.0'
+	    classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:4.2.0"
 	}
 }
 
 plugins {
-	id 'maven'
+	id 'maven-publish'
 }
 
 apply plugin: "com.vanniktech.dependency.graph.generator"
@@ -24,14 +24,10 @@ allprojects {
 
 subprojects {
 	if (new File("$project.projectDir/bnd.bnd").exists()) {
-		apply plugin: 'org.dm.bundle'
-		bundle {
-			instruction '-include', 'bnd.bnd'
-			failOnError = true
-		}
+		apply plugin: 'biz.aQute.bnd.builder'
 	}
 
-	apply plugin: 'maven'
+	apply plugin: 'maven-publish'
 
 	repositories {
 		mavenCentral()
