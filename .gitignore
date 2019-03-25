@@ -119,3 +119,5 @@ nb-configuration.xml
 .vscode/
 
 felix-cache/
+
+lombok.config
