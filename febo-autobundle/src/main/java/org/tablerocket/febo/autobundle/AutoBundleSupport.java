@@ -39,7 +39,7 @@ public class AutoBundleSupport
         {
             this.clazz = clazz;
             this.roots = null;
-
+            // headerBnd.put("-dsannotations-options","version;minimum=1.4.0");
         }
 
         public AutoBundleSpec withAutoExportApi( boolean yes )
