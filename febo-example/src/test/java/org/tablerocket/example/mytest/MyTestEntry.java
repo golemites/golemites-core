@@ -1,5 +1,6 @@
 package org.tablerocket.example.mytest;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.tablerocket.example.calculator.api.Calculator;
@@ -13,8 +14,12 @@ import java.io.PrintStream;
 @Component
 public class MyTestEntry implements FeboEntrypoint
 {
+    private Calculator calc;
 
-    @Reference Calculator calc;
+    @Activate
+    public MyTestEntry(@Reference Calculator calc) {
+        this.calc = calc;
+    }
 
     @Override public void execute( String[] args, InputStream in, PrintStream out, PrintStream err )
     {
