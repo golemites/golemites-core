@@ -1,20 +1,20 @@
-ext.junitPlatformVersion = '1.1.0'
-ext.junitJupiterVersion = '5.1.0'
+ext.junitPlatformVersion = '1.4.1'
+ext.junitJupiterVersion = '5.4.1'
 ext.log4jVersion = '2.9.0'
 def integrityVersion = '0.4.0-SNAPSHOT'
 def guavaVersion = '20.0'
 def lombokVersion = '1.18.6'
-def osgiVersion = '6.0.0'
+def osgiVersion = '7.0.0'
 def tinybundlesVersion = '3.0.1-SNAPSHOT'
 
 rootProject.ext {
     libraries = [
-            lombok                     : [group: "org.projectlombok", name: "lombok", version: lombokVersion, transitive: false],
+            //lombok                     : [group: "org.projectlombok", name: "lombok", version: lombokVersion, transitive: false],
             osgi_compendium            : [group: "org.osgi", name: "osgi.cmpn", version: osgiVersion, transitive: false],
-            osgi_core                  : [group: "org.osgi", name: "org.osgi.core", version: osgiVersion, transitive: false],
+            osgi_framework             : [group: "org.osgi", name: "org.osgi.framework", version: "1.9.0", transitive: false],
             integrity                  : [group: "org.rebaze.integrity", name: "org.rebaze.integrity.tree", version: integrityVersion, transitive: false],
             tinybundles                : 'org.ops4j.pax.tinybundles:tinybundles:' + tinybundlesVersion,
-            felix                      : 'org.apache.felix:org.apache.felix.framework:5.6.10'
+            felix                      : 'org.apache.felix:org.apache.felix.framework:6.0.2'
 
     ]
 }

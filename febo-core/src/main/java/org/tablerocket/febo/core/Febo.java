@@ -17,13 +17,11 @@ import org.tablerocket.febo.api.Dependency;
 import org.tablerocket.febo.api.DelayedBuilder;
 import org.tablerocket.febo.api.FeboEntrypoint;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ServiceLoader;
+import java.io.*;
+import java.net.URL;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
@@ -190,7 +188,11 @@ public class Febo implements AutoCloseable
         {
             start();
             for (Map.Entry<String, Handle> entry : blobindex.entrySet()) {
-                systemBundle.getBundleContext().installBundle( entry.getKey(),blobstore.load(entry.getValue()) );
+                Bundle b = systemBundle.getBundleContext().installBundle(  blobstore.getLocation(entry.getValue()).toASCIIString(),blobstore.load(entry.getValue()) );
+                LOG.info("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
+                scan(b);
+
+
             }
             success = bounce();
             if (success)
@@ -204,6 +206,28 @@ public class Febo implements AutoCloseable
             {
                 close();
             }
+        }
+    }
+
+    private void scan(Bundle b) {
+        ZipInputStream zip = null;
+        try {
+            zip = new ZipInputStream( new URL(b.getLocation()).openStream());
+
+        for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+            if (!entry.isDirectory() && entry.getName().startsWith("OSGI-INF/") && entry.getName().endsWith(".xml")) {
+                LOG.info(" + " + entry.getName());
+
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(b.getResource(entry.getName()).openStream()))) {
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                }
+            }
+        }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
