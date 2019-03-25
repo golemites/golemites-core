@@ -5,8 +5,6 @@ buildscript {
 		mavenCentral()
 	}
     dependencies {
-        classpath "org.junit.platform:junit-platform-gradle-plugin:${junitPlatformVersion}"
-		classpath "com.vanniktech:gradle-dependency-graph-generator-plugin:0.2.0"
 	    classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:4.2.0"
 	}
 }
@@ -14,8 +12,6 @@ buildscript {
 plugins {
 	id 'maven-publish'
 }
-
-apply plugin: "com.vanniktech.dependency.graph.generator"
 
 allprojects {
 	group "org.tablerocket.febo"
