@@ -120,6 +120,7 @@ class GenerateStaticApiTask extends DefaultTask {
             Tree tree = session.createStreamTreeBuilder().add(art.resolve()).seal()
             def methodSpec = MethodSpec.methodBuilder(name)
                     .addModifiers(Modifier.PUBLIC)
+                    .addJavadoc('version=$N',art.version)
                     .returns(Dependency.class)
                     .addStatement('return this.backend.resolve($S)',tree.value().hash())
                     .build()
