@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id 'maven'
+    id 'maven-publish'
 }
 
 compileJava {
@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     api project(':febo-core')
-    testCompile 'org.assertj:assertj-core:3.9.0'
+    testCompile 'org.assertj:assertj-core:3.12.2'
 
     // JUnit Jupiter API and TestEngine implementation
     testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")

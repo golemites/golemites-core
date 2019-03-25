@@ -1,11 +1,12 @@
 plugins {
     id 'java-library'
-    id 'maven'
+    id 'maven-publish'
+    id "io.freefair.lombok" version "3.1.4"
 }
 
 compileJava {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
     options.compilerArgs += '-parameters'
 }
 
@@ -21,16 +22,21 @@ dependencies {
     //compile libraries.osgi_core
     compile libraries.tinybundles
     compile libraries.felix
-    compile libraries.lombok
+    //compile libraries.lombok
 
     implementation 'com.google.guava:guava:27.1-jre'
 
-    compile 'com.squareup.okio:okio:1.13.0'
-    testCompile 'org.assertj:assertj-core:3.9.0'
+    compile 'com.squareup.okio:okio:1.17.3'
+    testCompile 'org.assertj:assertj-core:3.12.2'
 
     // JUnit Jupiter API and TestEngine implementation
     testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 
     // To avoid compiler warnings about @API annotations in JUnit code
-    testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')}
+    testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
+}
+
+test {
+    useJUnitPlatform()
+}
