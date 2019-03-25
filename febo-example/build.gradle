@@ -9,7 +9,7 @@ buildscript{
 
 plugins {
     id 'java-library'
-    id 'maven'
+    id 'maven-publish'
 }
 
 apply plugin: 'org.tablerocket.febo.plugin'
