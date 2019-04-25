@@ -13,13 +13,18 @@ import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tablerocket.febo.api.Dependency;
 import org.tablerocket.febo.api.DelayedBuilder;
+import org.tablerocket.febo.api.Dependency;
 import org.tablerocket.febo.api.FeboEntrypoint;
 
 import java.io.*;
 import java.net.URL;
-import java.util.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -65,14 +70,10 @@ public class Febo implements AutoCloseable
             + " ) _)  ) _)  ) _ ((  O )\n"
             + "(__)  (____)(____/ \\__/ \u001B[0m \u001B[0m\n");
 
-        String version = systemBundle.getHeaders().get( Constants.BUNDLE_VERSION );
-
-        System.out.println("\u001B[36mInitialized Febo running on Apache Felix "+version+"\u001B[0m \u001B[0m\r\n");
-
         systemBundle.start();
     }
 
-    public void kill() {
+    private void kill() {
         try
         {
             systemBundle.stop();
@@ -186,18 +187,21 @@ public class Febo implements AutoCloseable
         boolean success = false;
         try
         {
+            Instant t = Instant.now();
             start();
             for (Map.Entry<String, Handle> entry : blobindex.entrySet()) {
                 Bundle b = systemBundle.getBundleContext().installBundle(  blobstore.getLocation(entry.getValue()).toASCIIString(),blobstore.load(entry.getValue()) );
-                LOG.info("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
+                LOG.debug("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
                 scan(b);
-
-
             }
             success = bounce();
             if (success)
             {
                 FeboEntrypoint entry = entrypoint( FeboEntrypoint.class );
+                String version = systemBundle.getHeaders().get( Constants.BUNDLE_VERSION );
+                System.out.println("\u001B[36mBooted FEBO on Apache Felix " + version + " in " + Duration.between(t, Instant.now()).toMillis() + " ms.\u001B[0m \u001B[0m\r\n");
+
+                //System.out.println("System booted in " + Duration.between(t, Instant.now()).toMillis() + " ms.");
                 entry.execute( args, System.in, System.out, System.err );
             }
         }finally
@@ -216,12 +220,14 @@ public class Febo implements AutoCloseable
 
         for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
             if (!entry.isDirectory() && entry.getName().startsWith("OSGI-INF/") && entry.getName().endsWith(".xml")) {
-                LOG.info(" + " + entry.getName());
+                LOG.debug(" + " + entry.getName());
 
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(b.getResource(entry.getName()).openStream()))) {
                     String line = null;
                     while ((line = br.readLine()) != null) {
-                        System.out.println(line);
+                        if (LOG.isTraceEnabled()) {
+                            System.out.println(line);
+                        }
                     }
                 }
             }

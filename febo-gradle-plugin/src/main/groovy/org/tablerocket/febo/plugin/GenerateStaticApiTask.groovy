@@ -7,6 +7,7 @@ import com.squareup.javapoet.TypeSpec
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -64,7 +65,7 @@ class GenerateStaticApiTask extends DefaultTask {
 
         def localArt = project.configurations.getByName("compile").resolvedConfiguration.resolvedArtifacts
         for (ResolvedArtifact art : localArt) {
-            getLogger().warn("Found " + art.id.displayName + " file: " + art.file + " exists: " + art.file.exists())
+            getLogger().warn(" + Found " + art.id.displayName + " file: " + art.file + " exists: " + art.file.exists())
             ArtifactDescriptor desc = new ArtifactDescriptor(art.file)
             desc.name = art.name
             desc.group = art.moduleVersion.id.group
@@ -72,7 +73,16 @@ class GenerateStaticApiTask extends DefaultTask {
             desc.type = art.type
             desc.version = art.moduleVersion.id.version
             artifacts.add(desc)
+            for (PropertyValue pv : art.metaPropertyValues)
+            {
+                getLogger().warn("--> " + pv.name + "=" + pv.value)
+            }
         }
+        def loc = project.configurations.getByName("compile").resolvedConfiguration.firstLevelModuleDependencies
+        for (ResolvedDependency rs : loc) {
+            println rs
+        }
+
 
         createCompileDependenciesApiClazz(project, session, p,artifacts)
 

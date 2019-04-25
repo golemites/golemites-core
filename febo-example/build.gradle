@@ -49,7 +49,11 @@ dependencies {
     compile 'org.apache.felix:org.apache.felix.configadmin:1.9.14'
     compile 'org.apache.felix:org.apache.felix.scr:2.1.16'
     compile 'org.osgi:org.osgi.util.promise:1.1.1'
-    compile 'org.osgi:org.osgi.util.function:1.1.0'
+    compile('org.osgi:org.osgi.util.function:1.1.0') {
+        because 'UtilFunctions'
+    }
+
+
 
     //featureRepo group: 'org.apache.karaf.features', name: 'standard', version: '4.1.5', ext: 'xml', classifier: 'features'
     runtimeOnly group: 'org.slf4j', name: 'slf4j-simple', version:'1.7.25'

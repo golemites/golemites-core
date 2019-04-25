@@ -5,3 +5,4 @@ include "febo-autobundle"
 include "febo-gradle-plugin"
 //include "febo-example-bundle"
 include "febo-example"
+enableFeaturePreview("GRADLE_METADATA")
