@@ -68,28 +68,6 @@ dependencies {
 
     baseline 'org.ops4j.pax.logging:pax-logging-api:1.10.1'
     baseline 'org.ops4j.pax.logging:pax-logging-service:1.10.1'
-
-    /**
-     * <bundle>mvn:org.osgi/org.osgi.service.jaxrs/1.0.0</bundle>
-     *
-
-     *         <bundle>mvn:frozenpeak/frozenpeak-jaxrs-jsonb/999-SNAPSHOT</bundle>
-     *
-     *         <bundle>mvn:org.apache.felix/org.apache.felix.http.servlet-api/1.1.2</bundle>
-     *         <bundle>mvn:org.apache.felix/org.apache.felix.http.whiteboard/4.0.0</bundle>
-     *         <bundle>mvn:org.apache.aries.spec/org.apache.aries.javax.jax.rs-api/1.0.0</bundle>
-     *         <bundle>mvn:org.apache.felix/org.apache.felix.http.jetty/4.0.8</bundle>
-     *
-     *         <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/4.3.8/jar/all</bundle>
-     *         <!--
-     *         <bundle>mvn:org.apache.felix/org.apache.felix.webconsole.plugins.ds/2.0.8</bundle>
-     *         -->
-     *         <!--
-     *         <bundle>mvn:org.apache.felix/org.apache.felix.webconsole.plugins.event/1.1.8</bundle>
-     *         -->
-     *         <bundle>mvn:io.prometheus/simpleclient_servlet/0.5.0</bundle>
-     *         <bundle start-level="41">mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.whiteboard/1.0.4</bundle>
-     */
 }
 
 task sourcesJar(type: Jar) {
