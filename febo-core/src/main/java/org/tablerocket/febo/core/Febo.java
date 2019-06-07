@@ -32,7 +32,7 @@ import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 public class Febo implements AutoCloseable
 {
-    public final static Logger LOG = LoggerFactory.getLogger( Febo.class );
+    private final static Logger LOG = LoggerFactory.getLogger( Febo.class );
     private LinkedHashMap<String,Handle> blobindex = new LinkedHashMap<>(  );
     private final Store<InputStream> blobstore;
     private Framework systemBundle;
@@ -58,7 +58,7 @@ public class Febo implements AutoCloseable
             "unchecked", "rawtypes"
         })
         Properties p = new Properties();
-        //p.put( "org.osgi.framework.bootdelegation","org.tablerocket.febo.api" );
+        p.put( "org.osgi.framework.bootdelegation","org.apache.log4j" );
         p.put( "org.osgi.framework.system.packages.extra","org.tablerocket.febo.api" );
 
         Map<String,String> configuration = (Map) p;

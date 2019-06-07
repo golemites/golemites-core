@@ -63,24 +63,24 @@ class GenerateStaticApiTask extends DefaultTask {
 
         Set<ArtifactDescriptor> artifacts = new FeatureRepositoryResolverTask().loadArtifactsTransitively(project)
 
-        def localArt = project.configurations.getByName("compile").resolvedConfiguration.resolvedArtifacts
-        for (ResolvedArtifact art : localArt) {
-            getLogger().warn(" + Found " + art.id.displayName + " file: " + art.file + " exists: " + art.file.exists())
-            ArtifactDescriptor desc = new ArtifactDescriptor(art.file)
-            desc.name = art.name
-            desc.group = art.moduleVersion.id.group
-            desc.extension = art.extension
-            desc.type = art.type
-            desc.version = art.moduleVersion.id.version
-            artifacts.add(desc)
-            for (PropertyValue pv : art.metaPropertyValues)
-            {
-                getLogger().warn("--> " + pv.name + "=" + pv.value)
-            }
-        }
-        def loc = project.configurations.getByName("compile").resolvedConfiguration.firstLevelModuleDependencies
+
+        def loc = project.configurations.getByName("baseline").resolvedConfiguration.firstLevelModuleDependencies
         for (ResolvedDependency rs : loc) {
-            println rs
+
+            for (ResolvedArtifact art : rs.moduleArtifacts) {
+                println "First level: " + art.file.name
+                ArtifactDescriptor desc = new ArtifactDescriptor(art.file)
+                desc.name = art.name
+                desc.group = art.moduleVersion.id.group
+                desc.extension = art.extension
+                desc.type = art.type
+                desc.version = art.moduleVersion.id.version
+                artifacts.add(desc)
+                for (PropertyValue pv : art.metaPropertyValues)
+                {
+                    getLogger().warn("--> " + pv.name + "=" + pv.value)
+                }
+            }
         }
 
 

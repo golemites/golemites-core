@@ -19,16 +19,20 @@ allprojects {
 }
 
 subprojects {
+
 	if (new File("$project.projectDir/bnd.bnd").exists()) {
 		apply plugin: 'biz.aQute.bnd.builder'
 	}
 
 	apply plugin: 'maven-publish'
+	apply plugin: 'java-library'
 
 	repositories {
+		mavenLocal()
 		mavenCentral()
 		maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 		maven { url "http://repo.maven.apache.org/maven2" }
-		mavenLocal()
 	}
 }
+
+

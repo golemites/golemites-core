@@ -16,14 +16,15 @@ idea {
     }
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    api project(':febo-core')
     api project(':febo-repository')
     compile 'com.squareup:javapoet:1.11.1'
     compile libraries.osgi_framework

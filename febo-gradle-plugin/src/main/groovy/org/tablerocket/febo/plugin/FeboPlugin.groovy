@@ -42,6 +42,7 @@ class FeboPlugin implements Plugin<Project> {
         Task makeVersionClassTask = project.tasks.create( 'generateStaticApi', GenerateStaticApiTask.class)
         Task feboJar = project.tasks.create( 'feboJar', FeboJarTask.class)
 
+        project.getConfigurations().maybeCreate("baseline")
 
         // make sure that our generated src folder is part of the main source set.
         File generatedSrcDir = new File(project.buildDir, 'generated/java')
@@ -85,8 +86,8 @@ class FeboPlugin implements Plugin<Project> {
     }
 
     private void verifyGradleVersion() {
-        if (GradleVersion.current() < GradleVersion.version("4.0")) {
-            throw new GradleException("Febo plugin requires Gradle 4.0 or later."
+        if (GradleVersion.current() < GradleVersion.version("5.0")) {
+            throw new GradleException("Febo plugin requires Gradle 5.0 or later."
                     + " The current version is " + GradleVersion.current());
         }
     }

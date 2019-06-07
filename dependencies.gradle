@@ -1,5 +1,5 @@
-ext.junitPlatformVersion = '1.4.1'
-ext.junitJupiterVersion = '5.4.1'
+ext.junitPlatformVersion = '1.4.2'
+ext.junitJupiterVersion = '5.4.2'
 ext.log4jVersion = '2.9.0'
 def integrityVersion = '0.4.0-SNAPSHOT'
 def guavaVersion = '20.0'
@@ -14,7 +14,7 @@ rootProject.ext {
             osgi_framework             : [group: "org.osgi", name: "org.osgi.framework", version: "1.9.0", transitive: false],
             integrity                  : [group: "org.rebaze.integrity", name: "org.rebaze.integrity.tree", version: integrityVersion, transitive: false],
             tinybundles                : 'org.ops4j.pax.tinybundles:tinybundles:' + tinybundlesVersion,
-            felix                      : 'org.apache.felix:org.apache.felix.framework:6.0.2'
+            felix                      : 'org.apache.felix:org.apache.felix.framework:6.0.3'
 
     ]
 }
