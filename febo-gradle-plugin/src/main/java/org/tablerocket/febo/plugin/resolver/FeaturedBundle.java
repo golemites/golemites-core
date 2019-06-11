@@ -11,7 +11,5 @@ public class FeaturedBundle {
 
     Feature parentFeature;
 
-
     String url;
-
 }
