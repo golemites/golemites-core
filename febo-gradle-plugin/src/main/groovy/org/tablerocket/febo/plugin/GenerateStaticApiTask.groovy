@@ -78,11 +78,10 @@ class GenerateStaticApiTask extends DefaultTask {
                 artifacts.add(desc)
                 for (PropertyValue pv : art.metaPropertyValues)
                 {
-                    getLogger().warn("--> " + pv.name + "=" + pv.value)
+                    //getLogger().warn("--> " + pv.name + "=" + pv.value)
                 }
             }
         }
-
 
         createCompileDependenciesApiClazz(project, session, p,artifacts)
 
@@ -130,7 +129,7 @@ class GenerateStaticApiTask extends DefaultTask {
             Tree tree = session.createStreamTreeBuilder().add(art.resolve()).seal()
             def methodSpec = MethodSpec.methodBuilder(name)
                     .addModifiers(Modifier.PUBLIC)
-                    .addJavadoc('version=$N',art.version)
+                    .addJavadoc('Toni group=$N name=$N version=$N',art.group,art.name,art.version)
                     .returns(Dependency.class)
                     .addStatement('return this.backend.resolve($S)',tree.value().hash())
                     .build()
