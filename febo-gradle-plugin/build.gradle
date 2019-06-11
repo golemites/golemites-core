@@ -24,8 +24,8 @@ repositories {
 }
 
 dependencies {
-    api project(':febo-core')
-    api project(':febo-repository')
+    compile project(':febo-core')
+    compile project(':febo-repository')
     compile 'com.squareup:javapoet:1.11.1'
     compile libraries.osgi_framework
     compile libraries.integrity
