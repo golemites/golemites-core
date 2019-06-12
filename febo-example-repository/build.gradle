@@ -78,7 +78,7 @@ task sourcesJar(type: Jar) {
 publishing {
     publications {
         prebuilt(MavenPublication) {
-            artifact file("$buildDir/libs/febo-baseline-${version}.jar")
+            artifact file("$buildDir/libs/febo-example-repository-${version}.jar")
             artifact sourcesJar
         }
     }

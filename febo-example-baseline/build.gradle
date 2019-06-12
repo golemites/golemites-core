@@ -1,0 +1,70 @@
+buildscript{
+    repositories {
+        mavenLocal()
+    }
+    dependencies{
+        classpath 'org.tablerocket.febo:febo-gradle-plugin:0.1.0-SNAPSHOT'
+    }
+}
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+apply plugin: 'org.tablerocket.febo.plugin'
+
+febo {
+    packageName 'org.tablerocket.example'
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.compilerArgs += '-parameters'
+}
+
+compileTestJava {
+		options.compilerArgs += '-parameters'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    featureRepo
+}
+
+test {
+    useJUnitPlatform()
+}
+
+dependencies {
+    api project(':febo-core')
+    api project(':febo-repository')
+
+    baseline (group: "org.osgi", name: "org.osgi.service.jaxrs", version: '1.0.0', transitive: false)
+    baseline (group: "org.osgi", name: "osgi.core", version: '7.0.0', transitive: false)
+    baseline (group: "org.osgi", name: "osgi.cmpn", version: '7.0.0', transitive: false)
+    baseline (group: "org.apache.aries.spec", name: "org.apache.aries.javax.jax.rs-api", version: "1.0.0", transitive: false)
+    
+    baseline (group: "org.tablerocket.febo", name: "febo-core", version: "0.1.0-SNAPSHOT", transitive: false)
+    baseline (group: "org.tablerocket.febo", name: "febo-autobundle", version: "0.1.0-SNAPSHOT", transitive: false)
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
+}
+
+publishing {
+    publications {
+        prebuilt(MavenPublication) {
+            artifact file("$buildDir/libs/febo-example-baseline-${version}.jar")
+            artifact sourcesJar
+        }
+    }
+}
+
+
