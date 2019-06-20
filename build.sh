@@ -11,4 +11,6 @@
 
 # Enforce a full rebuild
 
-./gradlew publishToMavenLocal && ./gradlew :febo-example-repository:clean --P baseline=true && ./gradlew :febo-example-repository:jar --rerun-tasks :febo-example-repository:publishToMavenLocal --P baseline=true
+export ARTIFACT=febo-example-baseline
+
+./gradlew publishToMavenLocal && ./gradlew :$ARTIFACT:clean :$ARTIFACT:clean :$ARTIFACT:jar --stacktrace --P baseline=true  --rerun-tasks && ./gradlew :$ARTIFACT:publishToMavenLocal --rerun-tasks --P baseline=true
