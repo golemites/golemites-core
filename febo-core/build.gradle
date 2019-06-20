@@ -22,6 +22,7 @@ dependencies {
     //compile libraries.osgi_core
     compile libraries.tinybundles
     compile libraries.felix
+    compile 'org.apache.felix:org.apache.felix.resolver:2.0.0'
     //compile libraries.lombok
 
     implementation 'com.google.guava:guava:27.1-jre'
