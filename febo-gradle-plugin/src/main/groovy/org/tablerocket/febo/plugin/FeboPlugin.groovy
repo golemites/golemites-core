@@ -25,6 +25,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.SourceDirectorySet
+import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
@@ -36,12 +37,13 @@ class FeboPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         verifyGradleVersion()
-        project.getPlugins().apply(JavaPlugin.class)
+        project.getPlugins().apply(JavaLibraryPlugin.class)
         def extension = project.extensions.create("febo",FeboExtension, project)
 
         Task makeVersionClassTask = project.tasks.create( 'generateStaticApi', GenerateStaticApiTask.class)
-        Task feboJar = project.tasks.create( 'feboJar', FeboJarTask.class)
+        //Task feboJar = project.tasks.create( 'feboJar', FeboJarTask.class)
 
+        project.getConfigurations().maybeCreate("repository")
         project.getConfigurations().maybeCreate("baseline")
 
         // make sure that our generated src folder is part of the main source set.

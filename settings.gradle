@@ -5,7 +5,7 @@ include "febo-autobundle"
 include "febo-gradle-plugin"
 if (baseline == "true") {
     println "Building example surfaces.."
-    include "febo-example-repository"
+    //include "febo-example-repository"
     include "febo-example-baseline"
 }
 

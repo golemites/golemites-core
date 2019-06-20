@@ -24,13 +24,13 @@ import static org.tablerocket.febo.plugin.resolver.ArtifactDescriptor.parseGAV;
 
 public class FeatureRepositoryResolverTask {
 
-    public static final String INPUT_CONFIG = "featureRepo";
+    public static final String INPUT_CONFIG = "toni";
     private Project project;
 
     public Set<ArtifactDescriptor> loadArtifactsTransitively(Project project) throws Exception {
         this.project = project;
 
-        Configuration featureRepo = project.getConfigurations().getByName(INPUT_CONFIG);
+        Configuration featureRepo = project.getConfigurations().maybeCreate(INPUT_CONFIG);
         Set<ArtifactDescriptor> givenRepos = findTransitiveKaraFeatureRepositories(featureRepo);
         Set<FeaturedBundle> bundleRefs = new CompositeReadableFeatureRepository().collect(givenRepos);
 

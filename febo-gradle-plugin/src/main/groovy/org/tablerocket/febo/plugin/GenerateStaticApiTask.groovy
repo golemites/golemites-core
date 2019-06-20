@@ -19,8 +19,9 @@ import org.rebaze.integrity.tree.api.TreeSession
 import org.rebaze.integrity.tree.util.DefaultTreeSessionFactory
 import org.tablerocket.febo.api.Dependency
 import org.tablerocket.febo.plugin.resolver.ArtifactDescriptor
-import org.tablerocket.febo.plugin.resolver.FeatureRepositoryResolverTask
 import org.tablerocket.febo.repository.RepositoryStore
+import org.tablerocket.febo.synth.FlatCopyMirror
+import org.tablerocket.febo.synth.Mirror
 
 import javax.lang.model.element.Modifier
 
@@ -54,44 +55,68 @@ class GenerateStaticApiTask extends DefaultTask {
     @TaskAction
     void makeVersionClass() throws IOException {
         TreeSession session = new DefaultTreeSessionFactory().create()
-        Properties p = new Properties()
 
         def project = getProject()
-        def now = '' //new Date() disabled as it would nuke the build-cache + up to date checks.
         outputLocation.mkdirs()
 
+        // repository api
 
-        Set<ArtifactDescriptor> artifacts = new FeatureRepositoryResolverTask().loadArtifactsTransitively(project)
-
-
-        def loc = project.configurations.getByName("baseline").resolvedConfiguration.firstLevelModuleDependencies
-        for (ResolvedDependency rs : loc) {
+        Set<ArtifactDescriptor> repositoryArtifacts = new HashSet<>()
+        def repositoryConfigs = project.configurations.getByName("repository").resolvedConfiguration.firstLevelModuleDependencies
+        for (ResolvedDependency rs : repositoryConfigs) {
 
             for (ResolvedArtifact art : rs.moduleArtifacts) {
-                println "First level: " + art.file.name
+                println "+ Repository : " + art.file.name
                 ArtifactDescriptor desc = new ArtifactDescriptor(art.file)
                 desc.name = art.name
                 desc.group = art.moduleVersion.id.group
                 desc.extension = art.extension
                 desc.type = art.type
                 desc.version = art.moduleVersion.id.version
-                artifacts.add(desc)
-                for (PropertyValue pv : art.metaPropertyValues)
-                {
-                    //getLogger().warn("--> " + pv.name + "=" + pv.value)
-                }
+                repositoryArtifacts.add(desc)
             }
         }
-
-        createCompileDependenciesApiClazz(project, session, p,artifacts)
-
+        Properties p = new Properties()
+        createCompileDependenciesApiClazz(project, session, p,repositoryArtifacts)
         // Store the very blobstore index for now in a plain file here:
         File db = new File(generatedResourcesDir,"febo-blobs.properties");
         db.getParentFile().mkdirs();
         p.store(new FileWriter(db),"")
+
+
+        // baseline api
+        Set<ArtifactDescriptor> baselineArtifacts = new HashSet<>()
+        def baselineConfigs = project.configurations.getByName("baseline").resolvedConfiguration.firstLevelModuleDependencies
+        for (ResolvedDependency rs : baselineConfigs) {
+
+            for (ResolvedArtifact art : rs.moduleArtifacts) {
+                println "+ Baseline : " + art.file.name
+                ArtifactDescriptor desc = new ArtifactDescriptor(art.file)
+                desc.name = art.name
+                desc.group = art.moduleVersion.id.group
+                desc.extension = art.extension
+                desc.type = art.type
+                desc.version = art.moduleVersion.id.version
+                baselineArtifacts.add(desc)
+            }
+        }
+        mirrorApis(project, session, baselineArtifacts)
+
     }
 
-    private createCompileDependenciesApiClazz(Project project, TreeSession session, Properties p,Set<ArtifactDescriptor> karafRepoArtifacts) {
+    private mirrorApis(Project project, TreeSession session,Set<ArtifactDescriptor> artifacts) {
+        File out = new File(project.buildDir, 'classes/java/main')
+        println("Will write to " + out.absolutePath)
+        Mirror mirror = new FlatCopyMirror(out)
+
+        for (ArtifactDescriptor art : artifacts) {
+            // scan all classes
+            File f = art.resolve()
+            mirror.mirror(f)
+        }
+    }
+
+    private createCompileDependenciesApiClazz(Project project, TreeSession session, Properties p,Set<ArtifactDescriptor> artifacts) {
 
         def compileDepBuilder = TypeSpec.classBuilder("FeboRepository")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -105,7 +130,7 @@ class GenerateStaticApiTask extends DefaultTask {
                 .build())
 
         Map<String,ArtifactDescriptor> index = new HashMap<>();
-        for (ArtifactDescriptor art : karafRepoArtifacts) {
+        for (ArtifactDescriptor art : artifacts) {
             //getLogger().warn(" + " + art.name)
             if ((art.resolve() == null || !art.resolve().exists())) {
                 getLogger().warn(" - " + art.name + " bad because not existing: " + art.resolve())
@@ -129,7 +154,7 @@ class GenerateStaticApiTask extends DefaultTask {
             Tree tree = session.createStreamTreeBuilder().add(art.resolve()).seal()
             def methodSpec = MethodSpec.methodBuilder(name)
                     .addModifiers(Modifier.PUBLIC)
-                    .addJavadoc('Toni group=$N name=$N version=$N',art.group,art.name,art.version)
+                    .addJavadoc('group=$N name=$N version=$N',art.group,art.name,art.version)
                     .returns(Dependency.class)
                     .addStatement('return this.backend.resolve($S)',tree.value().hash())
                     .build()
@@ -156,8 +181,8 @@ class GenerateStaticApiTask extends DefaultTask {
             fis ->
                 TinyBundle tb = TinyBundles.bundle().read(fis)
                 if (fis != null) {
-                    String bsn = tb.getHeader("Bundle-SymbolicName");
-                    String version = tb.getHeader("Bundle-Version");
+                    String bsn = tb.getHeader("Bundle-SymbolicName")
+                    String version = tb.getHeader("Bundle-Version")
 
                     if (bsn != null) {
                         // fix any extra props:
