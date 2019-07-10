@@ -33,6 +33,23 @@ subprojects {
 		maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
 		maven { url "http://repo.maven.apache.org/maven2" }
 	}
+
+	task sourcesJar(type: Jar) {
+		from sourceSets.main.allJava
+		archiveClassifier = 'sources'
+	}
+
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
+				artifact sourcesJar
+			}
+		}
+		repositories {
+			mavenLocal()
+		}
+	}
 }
 
 
