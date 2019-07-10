@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tablerocket.febo.api.DelayedBuilder;
 import org.tablerocket.febo.api.Dependency;
+import org.tablerocket.febo.api.Febo;
 import org.tablerocket.febo.api.FeboEntrypoint;
 
 import java.io.*;
@@ -30,24 +31,24 @@ import java.util.zip.ZipInputStream;
 
 import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
-public class Febo implements AutoCloseable
-{
-    private final static Logger LOG = LoggerFactory.getLogger( Febo.class );
+public class OSGiFebo implements Febo {
+    private final static Logger LOG = LoggerFactory.getLogger( OSGiFebo.class );
     private LinkedHashMap<String,Handle> blobindex = new LinkedHashMap<>(  );
     private final Store<InputStream> blobstore;
     private Framework systemBundle;
     private boolean keepRunning = false;
 
-    private Febo() throws BundleException
+    private OSGiFebo() throws BundleException
     {
         this.blobstore = StoreFactory.defaultStore();
     }
 
     public static Febo febo() throws BundleException
     {
-        return new Febo();
+        return new OSGiFebo();
     }
 
+    @Override
     public void start() throws BundleException
     {
         IO.delete( new File("felix-cache") );
@@ -89,13 +90,15 @@ public class Febo implements AutoCloseable
         kill();
     }
 
-    public Febo require( DelayedBuilder<Dependency> delayed )
+    @Override
+    public Febo require(DelayedBuilder<Dependency> delayed)
     {
         require( delayed.build() );
         return this;
     }
 
-    public Febo require( Dependency... identifiers )
+    @Override
+    public Febo require(Dependency... identifiers)
 
     {
         try
@@ -114,13 +117,15 @@ public class Febo implements AutoCloseable
 
     }
 
-    public Febo require( String label, InputStream payload ) throws IOException
+    @Override
+    public Febo require(String label, InputStream payload) throws IOException
     {
         blobindex.put( label,blobstore.store( payload ) );
         return this;
     }
 
-    public Febo with( String label, TinyBundle tinyBundle ) throws IOException
+    @Override
+    public Febo with(String label, TinyBundle tinyBundle) throws IOException
     {
         blobindex.put( label,blobstore.store( tinyBundle.build( withBnd() ) ) );
         return this;
@@ -182,6 +187,7 @@ public class Febo implements AutoCloseable
      * By this time, dependencies must have met and the entrypoint must be reachable.
      * Otherwise this will raise an exception.
      */
+    @Override
     public synchronized void run(String[] args) throws Exception
     {
         boolean success = false;

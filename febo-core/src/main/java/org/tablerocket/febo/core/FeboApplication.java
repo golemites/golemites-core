@@ -1,11 +1,12 @@
 package org.tablerocket.febo.core;
 
 import org.osgi.framework.BundleException;
+import org.tablerocket.febo.api.Febo;
 import org.tablerocket.febo.api.FeboFactory;
 
 public class FeboApplication {
     public static Febo run(Class<? extends FeboFactory> primary, String[] args) throws BundleException {
-        Febo febo = Febo.febo();
+        Febo febo = OSGiFebo.febo();
         try {
             FeboFactory ff = primary.getDeclaredConstructor().newInstance();
             ff.configure(febo);
