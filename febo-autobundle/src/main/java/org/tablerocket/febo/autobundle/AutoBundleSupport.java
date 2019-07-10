@@ -135,7 +135,8 @@ public class AutoBundleSupport
             }
             else
             {
-                return new CollectFromItems( anchor );
+                URL location = anchor.getProtectionDomain().getCodeSource().getLocation();
+                return new CollectFromJar(location);
             }
         }
 
