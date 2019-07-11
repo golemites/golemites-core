@@ -19,10 +19,7 @@ import java.io.*;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -95,9 +92,16 @@ public class OSGiFebo implements Febo {
     }
 
     @Override
-    public Febo require(DelayedBuilder<Dependency> delayed)
+    public Febo require(DelayedBuilder<Dependency>... delayed)
     {
-        require( delayed.build() );
+        Arrays.asList(delayed).forEach( d -> require(d.build()));
+        return this;
+    }
+
+    @Override
+    public Febo require(Collection<DelayedBuilder<Dependency>> delayed)
+    {
+        delayed.forEach( d -> require(d.build()));
         return this;
     }
 

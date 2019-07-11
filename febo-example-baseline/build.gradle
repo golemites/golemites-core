@@ -56,6 +56,7 @@ dependencies {
     baseline (group: "org.osgi", name: "osgi.core", version: '7.0.0', transitive: false)
     baseline (group: "org.osgi", name: "osgi.cmpn", version: '7.0.0', transitive: false)
     baseline (group: "org.apache.aries.spec", name: "org.apache.aries.javax.jax.rs-api", version: "1.0.0", transitive: false)
+    baseline (group: 'org.osgi', name: 'org.osgi.annotation.bundle', version: '1.0.0', transitive: false)
 
     baseline (group: "org.tablerocket.febo", name: "febo-api", version: "0.1.0-SNAPSHOT", transitive: false)
     //baseline (group: "org.tablerocket.febo", name: "febo-autobundle", version: "0.1.0-SNAPSHOT", transitive: false)
