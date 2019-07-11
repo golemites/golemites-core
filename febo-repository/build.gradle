@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    api project(':febo-core')
+    compile project(':febo-api')
     testCompile 'org.assertj:assertj-core:3.9.0'
 
     // JUnit Jupiter API and TestEngine implementation

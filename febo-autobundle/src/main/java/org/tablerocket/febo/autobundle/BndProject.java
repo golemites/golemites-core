@@ -5,7 +5,7 @@ import org.ops4j.store.Handle;
 import org.ops4j.store.Store;
 import org.tablerocket.febo.api.DelayedBuilder;
 import org.tablerocket.febo.api.Dependency;
-import org.tablerocket.febo.core.ResolvedDependency;
+import org.tablerocket.febo.api.ResolvedDependency;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id "io.freefair.lombok" version "3.8.0"
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.compilerArgs += '-parameters'
+}
+
+compileTestJava {
+    options.compilerArgs += '-parameters'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    //compileOnly libraries.lombok
+    //annotationProcessor libraries.lombok
+}

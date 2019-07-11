@@ -3,7 +3,7 @@ plugins {
     id "idea"
     id "groovy"
     id "java-gradle-plugin"
-    id "io.freefair.lombok" version "3.1.4"
+    id "io.freefair.lombok" version "3.8.0"
 }
 
 /**
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':febo-core')
+    compile project(':febo-api')
     compile project(':febo-repository')
     compile 'com.squareup:javapoet:1.11.1'
     compile libraries.osgi_framework

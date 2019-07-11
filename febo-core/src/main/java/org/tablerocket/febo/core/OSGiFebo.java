@@ -13,10 +13,7 @@ import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tablerocket.febo.api.DelayedBuilder;
-import org.tablerocket.febo.api.Dependency;
-import org.tablerocket.febo.api.Febo;
-import org.tablerocket.febo.api.FeboEntrypoint;
+import org.tablerocket.febo.api.*;
 
 import java.io.*;
 import java.net.URL;
@@ -49,12 +46,10 @@ public class OSGiFebo implements Febo {
     }
 
     @Override
-    public void start() throws BundleException
+    public void start()
     {
         IO.delete( new File("felix-cache") );
-
         FrameworkFactory factory = ServiceLoader.load( FrameworkFactory.class ).iterator().next();
-
         @SuppressWarnings({
             "unchecked", "rawtypes"
         })
@@ -64,14 +59,23 @@ public class OSGiFebo implements Febo {
 
         Map<String,String> configuration = (Map) p;
         systemBundle = factory.newFramework(configuration);
-        systemBundle.init();
 
-        System.out.println("\u001B[36m ____  ____  ____   __  \n"
-            + "(  __)(  __)(  _ \\ /  \\ \n"
-            + " ) _)  ) _)  ) _ ((  O )\n"
-            + "(__)  (____)(____/ \\__/ \u001B[0m \u001B[0m\n");
+        try {
+            systemBundle.init();
+            System.out.println("\u001B[36m ____  ____  ____   __  \n"
+                + "(  __)(  __)(  _ \\ /  \\ \n"
+                + " ) _)  ) _)  ) _ ((  O )\n"
+                + "(__)  (____)(____/ \\__/ \u001B[0m \u001B[0m\n");
 
-        systemBundle.start();
+            systemBundle.start();
+        } catch (BundleException e) {
+            throw new RuntimeException("OSGI Framework did not boot..",e);
+        }
+    }
+
+    @Override
+    public Febo platform(RepositoryStore repositoryStore) {
+        return require(repositoryStore.platform());
     }
 
     private void kill() {
@@ -124,7 +128,6 @@ public class OSGiFebo implements Febo {
         return this;
     }
 
-    @Override
     public Febo with(String label, TinyBundle tinyBundle) throws IOException
     {
         blobindex.put( label,blobstore.store( tinyBundle.build( withBnd() ) ) );
@@ -243,6 +246,7 @@ public class OSGiFebo implements Febo {
         }
     }
 
+    @Override
     public Febo keepRunning(boolean keepRunning) {
         this.keepRunning = keepRunning;
         return this;

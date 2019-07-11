@@ -1,9 +1,12 @@
 package org.tablerocket.febo.repository;
 
 import org.tablerocket.febo.api.Dependency;
-import org.tablerocket.febo.core.ResolvedDependency;
+import org.tablerocket.febo.api.RepositoryStore;
+import org.tablerocket.febo.api.ResolvedDependency;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class ClasspathRepositoryStore implements RepositoryStore
@@ -36,5 +39,14 @@ public class ClasspathRepositoryStore implements RepositoryStore
     @Override public Dependency resolve( String s )
     {
         return new ResolvedDependency(s,ResolvedDependency.parseLocation( index.getProperty( s )));
+    }
+
+    @Override
+    public Dependency[] platform() {
+        List<Dependency> deps = new ArrayList<>();
+        for(String key : index.stringPropertyNames()) {
+            deps.add(resolve(key));
+        }
+        return deps.toArray(new Dependency[0]);
     }
 }

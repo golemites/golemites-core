@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id "io.freefair.lombok" version "3.1.4"
+    //id "io.freefair.lombok" version "3.8.0"
 }
 
 compileJava {
@@ -20,11 +20,12 @@ repositories {
 
 dependencies {
     //compile libraries.osgi_core
+    compile project(':febo-api')
     compile libraries.tinybundles
     compile libraries.felix
     compile 'org.apache.felix:org.apache.felix.resolver:2.0.0'
     //compile libraries.lombok
-
+    compile libraries.osgi_annotation
     implementation 'com.google.guava:guava:27.1-jre'
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.2.Final'
 

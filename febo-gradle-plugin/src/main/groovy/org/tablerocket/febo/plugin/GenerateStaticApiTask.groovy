@@ -17,9 +17,7 @@ import org.ops4j.pax.tinybundles.core.TinyBundles
 import org.rebaze.integrity.tree.api.Tree
 import org.rebaze.integrity.tree.api.TreeSession
 import org.rebaze.integrity.tree.util.DefaultTreeSessionFactory
-import org.tablerocket.febo.api.Dependency
 import org.tablerocket.febo.plugin.resolver.ArtifactDescriptor
-import org.tablerocket.febo.repository.RepositoryStore
 import org.tablerocket.febo.synth.FlatCopyMirror
 import org.tablerocket.febo.synth.Mirror
 

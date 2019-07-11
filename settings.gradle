@@ -1,11 +1,11 @@
 rootProject.name = 'febo'
+include 'febo-api'
 include "febo-core"
 include "febo-repository"
 include "febo-autobundle"
 include "febo-gradle-plugin"
 if (baseline == "true") {
     println "Building example surfaces.."
-    //include "febo-example-repository"
     include "febo-example-baseline"
 }
 

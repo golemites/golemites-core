@@ -1,9 +1,7 @@
-package org.tablerocket.febo.core;
+package org.tablerocket.febo.api;
 
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.tablerocket.febo.api.Dependency;
-import org.tablerocket.febo.api.Metadata;
 
 import java.net.URI;
 import java.net.URISyntaxException;

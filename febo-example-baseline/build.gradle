@@ -31,8 +31,7 @@ febo {
 }
 
 dependencies {
-    api project(':febo-core')
-    api project(':febo-repository')
+    api project(':febo-api')
 
     // This is the curated list of available bundles
     repository 'org.apache.felix:org.apache.felix.configadmin:1.9.14'
@@ -47,8 +46,8 @@ dependencies {
     repository 'org.apache.felix:org.apache.felix.http.whiteboard:4.0.0'
     repository 'org.apache.aries.spec:org.apache.aries.javax.jax.rs-api:1.0.0'
     repository 'org.apache.felix:org.apache.felix.http.jetty:4.0.8'
-    repository group: 'org.apache.felix', name: 'org.apache.felix.webconsole', version: '4.3.8', classifier: 'all'
-    repository 'io.prometheus:simpleclient_servlet:0.5.0'
+    //repository group: 'org.apache.felix', name: 'org.apache.felix.webconsole', version: '4.3.8', classifier: 'all'
+    //repository 'io.prometheus:simpleclient_servlet:0.5.0'
     repository 'org.apache.aries.jax.rs:org.apache.aries.jax.rs.whiteboard:1.0.4'
     repository 'org.ops4j.pax.logging:pax-logging-api:1.10.1'
     repository 'org.ops4j.pax.logging:pax-logging-service:1.10.1'
@@ -58,8 +57,8 @@ dependencies {
     baseline (group: "org.osgi", name: "osgi.cmpn", version: '7.0.0', transitive: false)
     baseline (group: "org.apache.aries.spec", name: "org.apache.aries.javax.jax.rs-api", version: "1.0.0", transitive: false)
 
-    baseline (group: "org.tablerocket.febo", name: "febo-core", version: "0.1.0-SNAPSHOT", transitive: false)
-    baseline (group: "org.tablerocket.febo", name: "febo-autobundle", version: "0.1.0-SNAPSHOT", transitive: false)
+    baseline (group: "org.tablerocket.febo", name: "febo-api", version: "0.1.0-SNAPSHOT", transitive: false)
+    //baseline (group: "org.tablerocket.febo", name: "febo-autobundle", version: "0.1.0-SNAPSHOT", transitive: false)
 }
 
 publishing {
