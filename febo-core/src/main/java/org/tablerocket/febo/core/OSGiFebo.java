@@ -35,7 +35,7 @@ public class OSGiFebo implements Febo {
     private Framework systemBundle;
     private boolean keepRunning = false;
 
-    private OSGiFebo() throws BundleException
+    public OSGiFebo() throws BundleException
     {
         this.blobstore = StoreFactory.defaultStore();
     }

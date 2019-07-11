@@ -50,7 +50,7 @@ dependencies {
     //repository 'io.prometheus:simpleclient_servlet:0.5.0'
     repository 'org.apache.aries.jax.rs:org.apache.aries.jax.rs.whiteboard:1.0.4'
     repository 'org.ops4j.pax.logging:pax-logging-api:1.10.1'
-    repository 'org.ops4j.pax.logging:pax-logging-service:1.10.1'
+    //repository 'org.ops4j.pax.logging:pax-logging-service:1.10.1'
 
     baseline (group: "org.osgi", name: "org.osgi.service.jaxrs", version: '1.0.0', transitive: false)
     baseline (group: "org.osgi", name: "osgi.core", version: '7.0.0', transitive: false)
