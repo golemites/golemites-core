@@ -79,7 +79,10 @@ public class AutoBundleSupport
         if (f.getAbsolutePath().startsWith(base.getCanonicalPath())) {
             if (f.isDirectory() && f.getAbsolutePath().contains("out/production/classes")) {
                 return true;
+            } else if (f.isDirectory() && f.getAbsolutePath().contains("/build/classes/java/main")) {
+                return true;
             }
+
             if (f.isFile()) {
                 return true;
             }
@@ -172,8 +175,8 @@ public class AutoBundleSupport
 
                     return new ResolvedDependency(name, store.getLocation(handle));
                 }else {
-                    String name = root.getName().substring(0,root.getName().length()-4);
-                    LOG.info("Root " + root + " becomes " + name);
+                    String name = calculateName(root);
+
                     List<Map.Entry<String, URL>> list = new ArrayList<>(map.entrySet());
 
                     TinyBundle bundle = bundle().set(Constants.BUNDLE_SYMBOLICNAME, name);
@@ -191,6 +194,23 @@ public class AutoBundleSupport
             catch ( IOException e )
             {
                 throw new RuntimeException( e );
+            }
+        }
+
+        private String calculateName(File root) {
+            if (root.isDirectory()) {
+                // assume gradle:
+                if (root.getAbsolutePath().endsWith("/out/production/classes")) {
+                    return root.getParentFile().getParentFile().getParentFile().getName();
+                } else if (root.getAbsolutePath().endsWith("/build/classes/java/main")) {
+                        return root.getParentFile().getParentFile().getParentFile().getParentFile().getName();
+                }else {
+                    throw new UnsupportedOperationException("Root " + root.getAbsolutePath() + " is unsupported currently.");
+                }
+            }else {
+                String name = root.getName().substring(0, root.getName().length() - 4);
+                LOG.info("Root " + root + " becomes " + name);
+                return name;
             }
         }
 

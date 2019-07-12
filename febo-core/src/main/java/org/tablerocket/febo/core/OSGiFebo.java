@@ -31,6 +31,7 @@ public class OSGiFebo implements Febo {
     private final Store<InputStream> blobstore;
     private Framework systemBundle;
     private boolean keepRunning = false;
+    private Set<String> packagesExposed = new HashSet<>();
 
     public OSGiFebo() throws BundleException
     {
@@ -43,6 +44,12 @@ public class OSGiFebo implements Febo {
     }
 
     @Override
+    public Febo exposePackage(String p) {
+        this.packagesExposed.add(p);
+        return this;
+    }
+
+    @Override
     public void start()
     {
         IO.delete( new File("felix-cache") );
@@ -52,7 +59,11 @@ public class OSGiFebo implements Febo {
         })
         Properties p = new Properties();
         p.put( "org.osgi.framework.bootdelegation","org.apache.log4j" );
-        p.put( "org.osgi.framework.system.packages.extra","org.tablerocket.febo.api" );
+
+        // autoexpose our own api
+        exposePackage("org.tablerocket.febo.api");
+        String extraPackages = String.join(",",packagesExposed);
+        p.put( "org.osgi.framework.system.packages.extra",extraPackages );
 
         Map<String,String> configuration = (Map) p;
         systemBundle = factory.newFramework(configuration);
@@ -204,7 +215,7 @@ public class OSGiFebo implements Febo {
             start();
             for (Map.Entry<String, Handle> entry : blobindex.entrySet()) {
                 Bundle b = systemBundle.getBundleContext().installBundle(  blobstore.getLocation(entry.getValue()).toASCIIString(),blobstore.load(entry.getValue()) );
-                LOG.debug("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
+                LOG.info("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
                 scan(b);
             }
             success = bounce();
@@ -224,6 +235,16 @@ public class OSGiFebo implements Febo {
                 close();
             }
         }
+    }
+
+    @Override
+    public <T> T service(Class<T> clazz) throws Exception {
+        return entrypoint(clazz);
+    }
+
+    @Override
+    public void stop() {
+        kill();
     }
 
     private void scan(Bundle b) {
