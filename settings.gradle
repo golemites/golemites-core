@@ -3,6 +3,7 @@ include 'febo-api'
 include "febo-core"
 include "febo-repository"
 include "febo-autobundle"
+include "febo-osgi-launcher"
 include "febo-gradle-plugin"
 include "febo-test-support"
 if (baseline == "true") {

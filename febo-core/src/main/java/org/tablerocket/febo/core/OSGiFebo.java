@@ -124,6 +124,7 @@ public class OSGiFebo implements Febo {
         {
             for (Dependency identifier : identifiers)
             {
+                LOG.info("Adding platform dependency: " + identifier.location().toASCIIString());
                 blobindex.put( identifier.identity(),
                     this.blobstore.store( identifier.location().toURL().openStream() ) );
             }

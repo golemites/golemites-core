@@ -9,9 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-public class ClasspathRepositoryStore implements RepositoryStore
+import static org.tablerocket.febo.repository.ClasspathRepositoryStore.BLOB_FILENAME;
+
+public class EmbeddedStore implements RepositoryStore
 {
-    public static final String BLOB_FILENAME = "febo-blobs.properties";
     private final Properties index;
 
     public Dependency dependency(String s)
@@ -19,22 +20,22 @@ public class ClasspathRepositoryStore implements RepositoryStore
         return new ResolvedDependency(s,ResolvedDependency.parseLocation( index.getProperty( s )));
     }
 
-    public ClasspathRepositoryStore()
+    public EmbeddedStore()
     {
         this("/" + BLOB_FILENAME);
     }
 
-    public ClasspathRepositoryStore(Properties p)
+    public EmbeddedStore(Properties p)
     {
         index = p;
     }
 
-    public ClasspathRepositoryStore( String path )
+    public EmbeddedStore(String path )
     {
         index = new Properties(  );
         try
         {
-            index.load( ClasspathRepositoryStore.class.getResourceAsStream( path ) );
+            index.load( EmbeddedStore.class.getResourceAsStream( path ) );
         }
         catch ( IOException e )
         {
@@ -44,7 +45,7 @@ public class ClasspathRepositoryStore implements RepositoryStore
 
     @Override public Dependency resolve( String s )
     {
-        return new ResolvedDependency(s,ResolvedDependency.parseLocation( index.getProperty( s )));
+        return new ResolvedDependency(s,ResolvedDependency.parseEmbedded( index.getProperty( s )));
     }
 
     @Override

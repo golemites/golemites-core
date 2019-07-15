@@ -24,8 +24,11 @@ repositories {
 }
 
 dependencies {
-    compile project(':febo-api')
+    compile project(':febo-core')
     compile project(':febo-repository')
+    compile project(':febo-autobundle')
+    compile project(':febo-osgi-launcher')
+
     compile 'com.squareup:javapoet:1.11.1'
     compile libraries.osgi_framework
     compile libraries.integrity
@@ -42,9 +45,13 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        featureAssemblyPlugin {
+        feboPlatformPlugin {
             id = "org.tablerocket.febo.plugin"
             implementationClass = "org.tablerocket.febo.plugin.FeboPlugin"
+        }
+        feboApplicationPlugin {
+            id = "org.tablerocket.febo.application.plugin"
+            implementationClass = "org.tablerocket.febo.plugin.application.FeboAppPlugin"
         }
     }
 }

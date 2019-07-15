@@ -33,13 +33,40 @@ public class AutoBundleSupport
 
     public Set<DelayedBuilder<Dependency>> scan( ClassLoader classLoader )
     {
+        List<URL> result = new ArrayList<> ();
+        scanClasspathJars(classLoader, result);
+        Set<DelayedBuilder<Dependency>> bundles = scan(result);
+        return bundles;
+    }
+
+    public Set<DelayedBuilder<Dependency>> scan(List<URL> input) {
         // scan classpath
         Set<DelayedBuilder<Dependency>> bundles = new HashSet<>();
+        try {
+            File base = new File(".").getCanonicalFile().getParentFile();
+            LOG.info("Base is " + base.getAbsolutePath());
 
-        // find all roots:
+            // we only care about things that are within our project.
+            for (URL url : input) {
+                if (url.getProtocol().equals("file")) {
 
-        List<URL> result = new ArrayList<> ();
+                    File f = new File(url.toURI());
+                    if (isPotentialCandidate(base,f)) {
+                        LOG.info(" + Candidate for autobundle: " + f.getAbsolutePath());
+                        bundles.add(new AutoBundleSpec(f));
+                    }else {
+                        LOG.info(" - Not candidate for autobundle: " + f.getAbsolutePath());
 
+                    }
+                }
+            }
+        } catch (URISyntaxException | IOException e) {
+            LOG.error("Problem during scanning classpath..",e);
+        }
+        return bundles;
+    }
+
+    private void scanClasspathJars(ClassLoader classLoader, List<URL> result) {
         ClassLoader useCl = classLoader;
 
         while (useCl != null) {
@@ -49,30 +76,6 @@ public class AutoBundleSupport
             }
             useCl = useCl.getParent();
         }
-
-
-        try {
-            File base = new File(".").getCanonicalFile().getParentFile();
-            LOG.info("Base is " + base.getAbsolutePath());
-
-            // we only care about things that are within our project.
-            for (URL url : result) {
-                if (url.getProtocol().equals("file")) {
-
-                    File f = new File(url.toURI());
-                    if (isPotentialCandidate(base,f)) {
-                        LOG.info(" + Candidate for autobundle: " + f.getAbsolutePath());
-                        bundles.add(new AutoBundleSpec(f));
-                    }else {
-                        LOG.debug(" - Not candidate for autobundle: " + f.getAbsolutePath());
-
-                    }
-                }
-            }
-        } catch (URISyntaxException | IOException e) {
-            LOG.error("Problem during scanning classpath..",e);
-        }
-        return bundles;
     }
 
     private boolean isPotentialCandidate(File base, File f) throws IOException {

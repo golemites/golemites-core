@@ -3,8 +3,10 @@ package org.tablerocket.febo.api;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Optional;
 
 @ToString
@@ -37,6 +39,22 @@ public class ResolvedDependency implements Dependency
             {
                 return new URI( location );
             }
+        }
+        catch ( URISyntaxException e )
+        {
+            throw new RuntimeException( "Bad url? (got: " + location + ")",e );
+        }
+    }
+
+    public static URI parseEmbedded( String location )
+    {
+        // detect jar
+
+        try
+        {
+            URL parent = ResolvedDependency.class.getProtectionDomain().getCodeSource().getLocation();
+            String path = new File(parent.toURI()).getPath();
+            return new URI("jar:" + parent.toExternalForm() + "!/" + location);
         }
         catch ( URISyntaxException e )
         {
