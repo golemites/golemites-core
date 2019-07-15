@@ -1,7 +1,6 @@
 package org.tablerocket.febo.core;
 
 import aQute.lib.io.IO;
-import org.ops4j.pax.tinybundles.core.TinyBundle;
 import org.ops4j.store.Handle;
 import org.ops4j.store.Store;
 import org.ops4j.store.StoreFactory;
@@ -22,8 +21,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 public class OSGiFebo implements Febo {
     private final static Logger LOG = LoggerFactory.getLogger( OSGiFebo.class );
@@ -141,12 +138,6 @@ public class OSGiFebo implements Febo {
     public Febo require(String label, InputStream payload) throws IOException
     {
         blobindex.put( label,blobstore.store( payload ) );
-        return this;
-    }
-
-    public Febo with(String label, TinyBundle tinyBundle) throws IOException
-    {
-        blobindex.put( label,blobstore.store( tinyBundle.build( withBnd() ) ) );
         return this;
     }
 
