@@ -1,8 +1,6 @@
 package org.tablerocket.febo.testsupport;
 
 import org.junit.jupiter.api.extension.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.tablerocket.febo.api.Boot;
 import org.tablerocket.febo.api.Febo;
 import org.tablerocket.febo.autobundle.AutoBundleSupport;
@@ -16,8 +14,6 @@ import java.util.Map;
 
 public class FeboExtension implements ParameterResolver, BeforeEachCallback, AfterEachCallback{
 
-    private static Logger LOG = LoggerFactory.getLogger(FeboExtension.class);
-
     private Map<String, Class<?>> services = new HashMap<>();
     private Febo febo;
 
@@ -27,9 +23,7 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
         this.febo = Boot.febo()
                 .platform(new ClasspathRepositoryStore().platform()) // the target platform
                 .require(autoBundle.discover(getClass().getClassLoader())) // domain bundles
-                .keepRunning(true)
-        //.require(autoBundle.from(MyTestEntry.class)) // test probe
-        ;
+                .keepRunning(true);
 
         if (context.getTestMethod().isPresent()) {
             Method m = context.getTestMethod().get();
@@ -40,9 +34,6 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
                 febo.exposePackage(type.getPackage().getName());
             }
         }
-
-
-
         febo.run(new String[]{});
     }
 
@@ -56,7 +47,7 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         Type type = parameterContext.getParameter().getType();
-        // check service availability
+        // TODO: check service availability
         return true;
     }
 
