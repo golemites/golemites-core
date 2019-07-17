@@ -1,41 +1,44 @@
 package org.tablerocket.febo.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tablerocket.febo.api.Dependency;
 import org.tablerocket.febo.api.RepositoryStore;
-import org.tablerocket.febo.api.ResolvedDependency;
+import org.tablerocket.febo.api.TargetPlatformSpec;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import static org.tablerocket.febo.repository.ClasspathRepositoryStore.BLOB_FILENAME;
 
 public class EmbeddedStore implements RepositoryStore
 {
-    private final Properties index;
+    private final static Logger LOG = LoggerFactory.getLogger(EmbeddedStore.class);
 
-    public Dependency dependency(String s)
-    {
-        return new ResolvedDependency(s,ResolvedDependency.parseLocation( index.getProperty( s )));
-    }
+    private final TargetPlatformSpec index;
 
     public EmbeddedStore()
     {
         this("/" + BLOB_FILENAME);
     }
 
-    public EmbeddedStore(Properties p)
-    {
-        index = p;
-    }
-
     public EmbeddedStore(String path )
     {
-        index = new Properties(  );
+        ObjectMapper mapper = new ObjectMapper();
         try
         {
-            index.load( EmbeddedStore.class.getResourceAsStream( path ) );
+            index = mapper.readValue(ClasspathRepositoryStore.class.getResourceAsStream( path ), TargetPlatformSpec.class);
+            // rewrite embedded resources
+            for (Dependency d : index.getDependencies()) {
+                URI old = d.getLocation();
+                URI newLocation = parseEmbedded(old.toASCIIString());
+                LOG.debug("Rewrite location from " + old.toASCIIString() + " to " + newLocation.toASCIIString());
+                d.setLocation(newLocation);
+            }
         }
         catch ( IOException e )
         {
@@ -43,17 +46,28 @@ public class EmbeddedStore implements RepositoryStore
         }
     }
 
-    @Override public Dependency resolve( String s )
+    public static URI parseEmbedded(String location )
     {
-        return new ResolvedDependency(s,ResolvedDependency.parseEmbedded( index.getProperty( s )));
+        // detect jar
+        try
+        {
+            URL parent = Dependency.class.getProtectionDomain().getCodeSource().getLocation();
+            return new URI("jar:" + parent.toExternalForm() + "!/" + location);
+        }
+        catch ( URISyntaxException e )
+        {
+            throw new RuntimeException( "Bad url? (got: " + location + ")",e );
+        }
     }
 
     @Override
-    public Dependency[] platform() {
-        List<Dependency> deps = new ArrayList<>();
-        for(String key : index.stringPropertyNames()) {
-            deps.add(resolve(key));
-        }
-        return deps.toArray(new Dependency[0]);
+    public TargetPlatformSpec platform() {
+        // TODO: rewrite locations..
+        return index;
+    }
+
+    @Override
+    public Dependency resolve(String s) {
+        return null;
     }
 }
