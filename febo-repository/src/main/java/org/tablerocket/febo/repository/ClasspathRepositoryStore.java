@@ -1,7 +1,5 @@
 package org.tablerocket.febo.repository;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.tablerocket.febo.api.Dependency;
 import org.tablerocket.febo.api.RepositoryStore;
@@ -14,6 +12,7 @@ public class ClasspathRepositoryStore implements RepositoryStore
 {
     public static final String BLOB_FILENAME = "febo-blobs.json";
     private final TargetPlatformSpec index;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public ClasspathRepositoryStore()
     {
@@ -22,7 +21,6 @@ public class ClasspathRepositoryStore implements RepositoryStore
 
     public ClasspathRepositoryStore( String path )
     {
-        ObjectMapper mapper = new ObjectMapper();
         try
         {
             index = mapper.readValue(ClasspathRepositoryStore.class.getResourceAsStream( path ), TargetPlatformSpec.class);
@@ -35,7 +33,6 @@ public class ClasspathRepositoryStore implements RepositoryStore
 
     public ClasspathRepositoryStore( byte[] data )
     {
-        ObjectMapper mapper = new ObjectMapper();
         try
         {
             index = mapper.readValue(data, TargetPlatformSpec.class);
@@ -48,9 +45,6 @@ public class ClasspathRepositoryStore implements RepositoryStore
 
     public ClasspathRepositoryStore( InputStream is )
     {
-        JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
-        ObjectMapper mapper = new ObjectMapper(jsonFactory);
         try
         {
             index = mapper.readValue(is, TargetPlatformSpec.class);
@@ -68,6 +62,6 @@ public class ClasspathRepositoryStore implements RepositoryStore
 
     @Override
     public Dependency resolve(String s) {
-        return null;
+        throw new UnsupportedOperationException("Cannot resolve from here since it should be all static anyway.");
     }
 }
