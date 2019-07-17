@@ -38,7 +38,9 @@ public class ArtifactDescriptor
     @Setter
     private String type;
 
-    private transient File file;
+    @Getter
+    @Setter
+    private File file;
 
 
     public ArtifactDescriptor(SingleArtifactResolver resolver) {

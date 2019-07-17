@@ -28,7 +28,7 @@ public class FlatCopyMirror implements Mirror {
             JarEntry entry = null;
             while ((entry = jip.getNextJarEntry()) != null) {
                 if (entry.getName().endsWith(".class") && !entry.getName().endsWith("package-info.class")) {
-                    LOG.warn(" + " + entry);
+                    LOG.debug("Adding baseline class: " + entry);
                     File out = new File(target,entry.getName());
                     out.getParentFile().mkdirs();
                     try (BufferedSink buffer = Okio.buffer(sink(out))) {

@@ -1,5 +1,7 @@
 package org.tablerocket.febo.plugin
 
+import aQute.bnd.annotation.metatype.Meta
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
@@ -8,6 +10,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.ResolvedDependency
+import org.gradle.api.component.Artifact
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -18,7 +21,9 @@ import org.rebaze.integrity.tree.api.Tree
 import org.rebaze.integrity.tree.api.TreeSession
 import org.rebaze.integrity.tree.util.DefaultTreeSessionFactory
 import org.tablerocket.febo.api.Dependency
+import org.tablerocket.febo.api.Metadata
 import org.tablerocket.febo.api.RepositoryStore
+import org.tablerocket.febo.api.TargetPlatformSpec
 import org.tablerocket.febo.plugin.resolver.ArtifactDescriptor
 import org.tablerocket.febo.synth.FlatCopyMirror
 import org.tablerocket.febo.synth.Mirror
@@ -61,12 +66,12 @@ class GenerateStaticApiTask extends DefaultTask {
 
         // repository api
 
-        Set<ArtifactDescriptor> repositoryArtifacts = new HashSet<>()
+        List<ArtifactDescriptor> repositoryArtifacts = new ArrayList<>()
+
         def repositoryConfigs = project.configurations.getByName("repository").resolvedConfiguration.firstLevelModuleDependencies
         for (ResolvedDependency rs : repositoryConfigs) {
-
             for (ResolvedArtifact art : rs.moduleArtifacts) {
-                println "+ Repository : " + art.file.name
+                getLogger().info "+ Repository : " + art.file.name
                 ArtifactDescriptor desc = new ArtifactDescriptor(art.file)
                 desc.name = art.name
                 desc.group = art.moduleVersion.id.group
@@ -76,12 +81,34 @@ class GenerateStaticApiTask extends DefaultTask {
                 repositoryArtifacts.add(desc)
             }
         }
-        Properties p = new Properties()
-        createCompileDependenciesApiClazz(project, session, p,repositoryArtifacts)
+        createCompileDependenciesApiClazz(project, session, repositoryArtifacts)
         // Store the very blobstore index for now in a plain file here:
         File db = new File(generatedResourcesDir,"febo-blobs.properties");
         db.getParentFile().mkdirs();
-        p.store(new FileWriter(db),"")
+
+
+        // write new format:
+        ObjectMapper mapper = new ObjectMapper()
+
+        TargetPlatformSpec platform = new TargetPlatformSpec()
+
+        List<Dependency> deps = new ArrayList<Dependency>()
+        for (ArtifactDescriptor ad : repositoryArtifacts) {
+            Dependency rd = Dependency.dependency(
+                    session.createStreamTreeBuilder().add(ad.resolve()).seal().value().hash(),
+                    ad.resolve().toURI(),
+                    Metadata.metadata(
+                        ad.group,
+                        ad.name,
+                        ad.version,
+                        ad.classifier,
+                        ad.type
+                    )
+            )
+            deps.add(rd)
+        }
+        platform.setDependencies(deps.toArray(new Dependency[deps.size()]))
+        mapper.writeValue(new File(generatedResourcesDir,"febo-blobs.json"),platform)
 
 
         // baseline api
@@ -90,7 +117,7 @@ class GenerateStaticApiTask extends DefaultTask {
         for (ResolvedDependency rs : baselineConfigs) {
 
             for (ResolvedArtifact art : rs.moduleArtifacts) {
-                println "+ Baseline : " + art.file.name
+                getLogger().info "+ Baseline : " + art.file.name
                 ArtifactDescriptor desc = new ArtifactDescriptor(art.file)
                 desc.name = art.name
                 desc.group = art.moduleVersion.id.group
@@ -106,17 +133,17 @@ class GenerateStaticApiTask extends DefaultTask {
 
     private mirrorApis(Project project, TreeSession session,Set<ArtifactDescriptor> artifacts) {
         File out = new File(project.buildDir, 'classes/java/main')
-        println("Will write to " + out.absolutePath)
+        logger.info "Will write to " + out.absolutePath
         Mirror mirror = new FlatCopyMirror(out)
 
         for (ArtifactDescriptor art : artifacts) {
-            // scan all classes
+            // discover all classes
             File f = art.resolve()
             mirror.mirror(f)
         }
     }
 
-    private createCompileDependenciesApiClazz(Project project, TreeSession session, Properties p,Set<ArtifactDescriptor> artifacts) {
+    private createCompileDependenciesApiClazz(Project project, TreeSession session, List<ArtifactDescriptor> artifacts) {
 
         def compileDepBuilder = TypeSpec.classBuilder("FeboRepository")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -158,15 +185,8 @@ class GenerateStaticApiTask extends DefaultTask {
                     .returns(Dependency.class)
                     .addStatement('return this.backend.resolve($S)',tree.value().hash())
                     .build()
-            /**
-            def fieldSpec = FieldSpec.builder(String.class, name).addModifiers(Modifier.FINAL, Modifier.PUBLIC)
-                    .initializer('$S', tree.fingerprint())
-                    .build()
-         **/
-            p.put(tree.value().hash(), art.resolve().absolutePath)
            // compileDepBuilder.addField(fieldSpec)
             compileDepBuilder.addMethod(methodSpec)
-
         }
 
         JavaFile javaFile = JavaFile.builder(packageName, compileDepBuilder.build()).build()

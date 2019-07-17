@@ -35,6 +35,7 @@ dependencies {
     compile libraries.tinybundles
     compile 'com.squareup.okio:okio:1.13.0'
     compile 'org.ow2.asm:asm-commons:7.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
 
     testCompile gradleTestKit()
     testCompile 'junit:junit:4.12'
