@@ -1,14 +1,27 @@
 package org.tablerocket.febo.api;
 
-public interface Metadata
+import lombok.Data;
+
+@Data
+public class Metadata
 {
-     String groupId();
+     private String groupId;
 
-     String artifactId();
+     private String artifactId;
 
-     String version();
+     private String version;
 
-     String classifier();
+     private String classifier;
 
-     String type();
+     private String type;
+
+     public static Metadata metadata(String groupId, String artifactId, String version, String classifier, String type) {
+          Metadata metadata = new Metadata();
+          metadata.setGroupId(groupId);
+          metadata.setArtifactId(artifactId);
+          metadata.setVersion(version);
+          metadata.setClassifier(classifier);
+          metadata.setType(type);
+          return metadata;
+     }
 }

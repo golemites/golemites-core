@@ -2,7 +2,7 @@ package org.tablerocket.febo.api;
 
 public interface RepositoryStore
 {
-    Dependency resolve(String s);
+    TargetPlatformSpec platform();
 
-    Dependency[] platform();
+    Dependency resolve(String s);
 }

@@ -3,7 +3,6 @@ package org.tablerocket.febo.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.List;
 
 public interface Febo extends AutoCloseable {
 
@@ -11,7 +10,7 @@ public interface Febo extends AutoCloseable {
 
     void start();
 
-    Febo platform(RepositoryStore repositoryStore);
+    Febo platform(TargetPlatformSpec platform);
 
     Febo require(DelayedBuilder<Dependency>... delayed);
 
