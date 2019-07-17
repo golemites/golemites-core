@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tablerocket.febo.api.DelayedBuilder;
 import org.tablerocket.febo.api.Dependency;
-import org.tablerocket.febo.api.ResolvedDependency;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.ops4j.pax.tinybundles.core.TinyBundles.*;
+import static org.tablerocket.febo.api.Dependency.dependency;
 import static org.tablerocket.febo.autobundle.Util.findClassesFolder;
 
 public class AutoBundleSupport
@@ -31,20 +31,17 @@ public class AutoBundleSupport
         return new AutoBundleSpec( clazz );
     }
 
-    public Set<DelayedBuilder<Dependency>> scan( ClassLoader classLoader )
+    public Set<DelayedBuilder<Dependency>> discover(ClassLoader classLoader )
     {
-        List<URL> result = new ArrayList<> ();
-        scanClasspathJars(classLoader, result);
-        Set<DelayedBuilder<Dependency>> bundles = scan(result);
-        return bundles;
+        return discover(scanClasspathJars(classLoader));
     }
 
-    public Set<DelayedBuilder<Dependency>> scan(List<URL> input) {
-        // scan classpath
+    public Set<DelayedBuilder<Dependency>> discover(List<URL> input) {
+        // discover classpath
         Set<DelayedBuilder<Dependency>> bundles = new HashSet<>();
         try {
             File base = new File(".").getCanonicalFile().getParentFile();
-            LOG.info("Base is " + base.getAbsolutePath());
+            LOG.debug("Base is " + base.getAbsolutePath());
 
             // we only care about things that are within our project.
             for (URL url : input) {
@@ -52,10 +49,10 @@ public class AutoBundleSupport
 
                     File f = new File(url.toURI());
                     if (isPotentialCandidate(base,f)) {
-                        LOG.info(" + Candidate for autobundle: " + f.getAbsolutePath());
+                        LOG.debug(" + Candidate for autobundle: " + f.getAbsolutePath());
                         bundles.add(new AutoBundleSpec(f));
                     }else {
-                        LOG.info(" - Not candidate for autobundle: " + f.getAbsolutePath());
+                        LOG.trace(" - Not candidate for autobundle: " + f.getAbsolutePath());
 
                     }
                 }
@@ -66,7 +63,8 @@ public class AutoBundleSupport
         return bundles;
     }
 
-    private void scanClasspathJars(ClassLoader classLoader, List<URL> result) {
+    private List<URL> scanClasspathJars(ClassLoader classLoader) {
+        List<URL> result = new ArrayList<>();
         ClassLoader useCl = classLoader;
 
         while (useCl != null) {
@@ -76,6 +74,7 @@ public class AutoBundleSupport
             }
             useCl = useCl.getParent();
         }
+        return result;
     }
 
     private boolean isPotentialCandidate(File base, File f) throws IOException {
@@ -176,7 +175,7 @@ public class AutoBundleSupport
 
                     Handle handle = store.store(bundle.build(withBnd()));
 
-                    return new ResolvedDependency(name, store.getLocation(handle));
+                    return dependency(name, store.getLocation(handle));
                 }else {
                     String name = calculateName(root);
 
@@ -191,7 +190,7 @@ public class AutoBundleSupport
                         bundle.set(entry.getKey(), entry.getValue());
                     }
                     Handle handle = store.store(bundle.build(withBnd()));
-                    return new ResolvedDependency(name, store.getLocation(handle));
+                    return dependency(name, store.getLocation(handle));
                 }
             }
             catch ( IOException e )
