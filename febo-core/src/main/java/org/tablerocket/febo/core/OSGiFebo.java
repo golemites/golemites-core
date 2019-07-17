@@ -55,7 +55,8 @@ public class OSGiFebo implements Febo {
             "unchecked", "rawtypes"
         })
         Properties p = new Properties();
-        p.put( "org.osgi.framework.bootdelegation","org.apache.log4j" );
+        //p.put( "org.osgi.framework.bootdelegation","org.apache.log4j" );
+        p.put( "org.ops4j.pax.logging.DefaultServiceLog.level","WARN" );
 
         // autoexpose our own api
         exposePackage("org.tablerocket.febo.api");
@@ -79,8 +80,8 @@ public class OSGiFebo implements Febo {
     }
 
     @Override
-    public Febo platform(RepositoryStore repositoryStore) {
-        return require(repositoryStore.platform());
+    public Febo platform(TargetPlatformSpec platform) {
+        return require(platform.getDependencies());
     }
 
     private void kill() {
@@ -115,15 +116,14 @@ public class OSGiFebo implements Febo {
 
     @Override
     public Febo require(Dependency... identifiers)
-
     {
         try
         {
             for (Dependency identifier : identifiers)
             {
-                LOG.info("Adding platform dependency: " + identifier.location().toASCIIString());
-                blobindex.put( identifier.identity(),
-                    this.blobstore.store( identifier.location().toURL().openStream() ) );
+                LOG.debug("Adding platform dependency: " + identifier.getLocation().toASCIIString());
+                blobindex.put( identifier.getIdentity(),
+                    this.blobstore.store( identifier.getLocation().toURL().openStream() ) );
             }
             return this;
         }
@@ -201,25 +201,25 @@ public class OSGiFebo implements Febo {
     public synchronized void run(String[] args) throws Exception
     {
         boolean success = false;
+        Instant t = Instant.now();
+
         try
         {
-            Instant t = Instant.now();
             start();
             for (Map.Entry<String, Handle> entry : blobindex.entrySet()) {
                 Bundle b = systemBundle.getBundleContext().installBundle(  blobstore.getLocation(entry.getValue()).toASCIIString(),blobstore.load(entry.getValue()) );
-                LOG.info("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
-                scan(b);
+                LOG.debug("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
+                //scan(b);
             }
             success = bounce();
             if (success)
             {
                 FeboEntrypoint entry = entrypoint( FeboEntrypoint.class );
-                String version = systemBundle.getHeaders().get( Constants.BUNDLE_VERSION );
-                System.out.println("\u001B[36mBooted FEBO on Apache Felix " + version + " in " + Duration.between(t, Instant.now()).toMillis() + " ms.\u001B[0m \u001B[0m\r\n");
-
                 //System.out.println("System booted in " + Duration.between(t, Instant.now()).toMillis() + " ms.");
                 entry.execute( args, System.in, System.out, System.err );
             }
+            String version = systemBundle.getHeaders().get( Constants.BUNDLE_VERSION );
+            LOG.info("\u001B[36mBooted FEBO on Apache Felix " + version + " in " + Duration.between(t, Instant.now()).toMillis() + " ms.\u001B[0m \u001B[0m\r\n");
         }finally
         {
             if (!success || !keepRunning)
