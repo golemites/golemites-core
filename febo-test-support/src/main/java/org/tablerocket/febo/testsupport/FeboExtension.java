@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FeboExtension implements ParameterResolver, BeforeEachCallback, AfterEachCallback, BeforeTestExecutionCallback, AfterTestExecutionCallback {
+public class FeboExtension implements ParameterResolver, BeforeEachCallback, AfterEachCallback{
 
     private static Logger LOG = LoggerFactory.getLogger(FeboExtension.class);
 
@@ -25,8 +25,8 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
     public void beforeEach(ExtensionContext context) throws Exception {
         AutoBundleSupport autoBundle = new AutoBundleSupport();
         this.febo = Boot.febo()
-                .platform(new ClasspathRepositoryStore()) // the target platform
-                .require(autoBundle.scan(getClass().getClassLoader())) // domain bundles
+                .platform(new ClasspathRepositoryStore().platform()) // the target platform
+                .require(autoBundle.discover(getClass().getClassLoader())) // domain bundles
                 .keepRunning(true)
         //.require(autoBundle.from(MyTestEntry.class)) // test probe
         ;
@@ -57,8 +57,6 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         Type type = parameterContext.getParameter().getType();
         // check service availability
-
-        LOG.info(" + Need to inject this: " + type.getTypeName() + " for parameter: " + parameterContext.getParameter().getName());
         return true;
     }
 
@@ -71,14 +69,6 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
         }
     }
 
-    @Override
-    public void afterTestExecution(ExtensionContext context) throws Exception {
-        LOG.info("Need to tear febo down here.");
-    }
 
-    @Override
-    public void beforeTestExecution(ExtensionContext context) throws Exception {
-        LOG.info("Need to start febo here: beforeTestExecution");
-    }
 
 }
