@@ -13,4 +13,4 @@
 
 export ARTIFACT=febo-example-baseline
 
-./gradlew publishToMavenLocal && ./gradlew :$ARTIFACT:publishToMavenLocal --P baseline=true
+./gradlew publishToMavenLocal && ./gradlew :$ARTIFACT:publishToMavenLocal --P baseline=true -i --stacktrace
