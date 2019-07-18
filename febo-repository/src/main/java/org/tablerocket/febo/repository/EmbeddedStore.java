@@ -18,8 +18,10 @@ import static org.tablerocket.febo.repository.ClasspathRepositoryStore.BLOB_FILE
 public class EmbeddedStore implements RepositoryStore
 {
     private final static Logger LOG = LoggerFactory.getLogger(EmbeddedStore.class);
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private final TargetPlatformSpec index;
+
 
     public EmbeddedStore()
     {
@@ -28,7 +30,6 @@ public class EmbeddedStore implements RepositoryStore
 
     public EmbeddedStore(String path )
     {
-        ObjectMapper mapper = new ObjectMapper();
         try
         {
             index = mapper.readValue(ClasspathRepositoryStore.class.getResourceAsStream( path ), TargetPlatformSpec.class);
@@ -46,9 +47,8 @@ public class EmbeddedStore implements RepositoryStore
         }
     }
 
-    public static URI parseEmbedded(String location )
+    private static URI parseEmbedded(String location )
     {
-        // detect jar
         try
         {
             URL parent = Dependency.class.getProtectionDomain().getCodeSource().getLocation();
@@ -62,12 +62,11 @@ public class EmbeddedStore implements RepositoryStore
 
     @Override
     public TargetPlatformSpec platform() {
-        // TODO: rewrite locations..
         return index;
     }
 
     @Override
     public Dependency resolve(String s) {
-        return null;
+        throw new UnsupportedOperationException("Custom resolve is not supported anymore.");
     }
 }
