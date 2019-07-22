@@ -30,11 +30,25 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
             for (Parameter parameter : m.getParameters()) {
                 String name = parameter.getName();
                 Class<?> type = parameter.getType();
-                services.put(name,type);
-                febo.exposePackage(type.getPackage().getName());
+                expose(name, type);
             }
         }
         febo.run(new String[]{});
+    }
+
+    private void expose(String name, Class<?> type) {
+        services.put(name,type);
+        febo.exposePackage(type.getPackage().getName());
+        for (Method m : type.getMethods()) {
+            if (m.getReturnType() != null && m.getReturnType().getPackage() != null) {
+                febo.exposePackage(m.getReturnType().getPackage().getName());
+            }
+            for (Parameter p : m.getParameters()) {
+                if (p.getType() != null && p.getType().getPackage() != null) {
+                    febo.exposePackage(p.getType().getPackage().getName());
+                }
+            }
+        }
     }
 
     @Override
