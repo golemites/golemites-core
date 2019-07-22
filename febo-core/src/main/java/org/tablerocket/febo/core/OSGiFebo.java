@@ -30,13 +30,11 @@ public class OSGiFebo implements Febo {
     private boolean keepRunning = false;
     private Set<String> packagesExposed = new HashSet<>();
 
-    public OSGiFebo() throws BundleException
-    {
+    public OSGiFebo() {
         this.blobstore = StoreFactory.defaultStore();
     }
 
-    public static Febo febo() throws BundleException
-    {
+    public static Febo febo() {
         return new OSGiFebo();
     }
 
