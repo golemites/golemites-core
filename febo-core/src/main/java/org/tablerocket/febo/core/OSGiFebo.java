@@ -27,7 +27,6 @@ public class OSGiFebo implements Febo {
     private LinkedHashMap<String,Handle> blobindex = new LinkedHashMap<>(  );
     private final Store<InputStream> blobstore;
     private Framework systemBundle;
-    private boolean keepRunning = false;
     private Set<String> packagesExposed = new HashSet<>();
 
     public OSGiFebo() {
@@ -45,24 +44,11 @@ public class OSGiFebo implements Febo {
     }
 
     @Override
-    public void start()
+    public boolean start()
     {
+        Instant t = Instant.now();
         IO.delete( new File("felix-cache") );
-        FrameworkFactory factory = ServiceLoader.load( FrameworkFactory.class ).iterator().next();
-        @SuppressWarnings({
-            "unchecked", "rawtypes"
-        })
-        Properties p = new Properties();
-        //p.put( "org.osgi.framework.bootdelegation","org.apache.log4j" );
-        p.put( "org.ops4j.pax.logging.DefaultServiceLog.level","WARN" );
-
-        // autoexpose our own api
-        exposePackage("org.tablerocket.febo.api");
-        String extraPackages = String.join(",",packagesExposed);
-        p.put( "org.osgi.framework.system.packages.extra",extraPackages );
-
-        Map<String,String> configuration = (Map) p;
-        systemBundle = factory.newFramework(configuration);
+        systemBundle = configureFramework();
 
         try {
             systemBundle.init();
@@ -72,9 +58,31 @@ public class OSGiFebo implements Febo {
                 + "(__)  (____)(____/ \\__/ \u001B[0m \u001B[0m\n");
 
             systemBundle.start();
-        } catch (BundleException e) {
+            for (Map.Entry<String, Handle> entry : blobindex.entrySet()) {
+                Bundle b = systemBundle.getBundleContext().installBundle(  blobstore.getLocation(entry.getValue()).toASCIIString(),blobstore.load(entry.getValue()) );
+                LOG.debug("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
+                //scan(b);
+            }
+            boolean success = bounce();
+            if (success) {
+                String version = systemBundle.getHeaders().get( Constants.BUNDLE_VERSION );
+                LOG.info("\u001B[36mBooted FEBO on Apache Felix " + version + " in " + Duration.between(t, Instant.now()).toMillis() + " ms.\u001B[0m \u001B[0m\r\n");
+            }
+            return success;
+        } catch (BundleException | IOException e) {
             throw new RuntimeException("OSGI Framework did not boot..",e);
         }
+    }
+
+    @SuppressWarnings({"unchecked","rawtypes"})
+    private Framework configureFramework() {
+        FrameworkFactory factory = ServiceLoader.load( FrameworkFactory.class ).iterator().next();
+        Properties p = new Properties();
+        p.put( "org.ops4j.pax.logging.DefaultServiceLog.level","WARN" );
+        exposePackage("org.tablerocket.febo.api");
+        String extraPackages = String.join(",",packagesExposed);
+        p.put( "org.osgi.framework.system.packages.extra",extraPackages );
+        return factory.newFramework((Map) p);
     }
 
     @Override
@@ -161,10 +169,8 @@ public class OSGiFebo implements Febo {
         return success;
     }
 
-    private <T> T entrypoint( Class<T> entryClass )
+    private <T> Optional<T> entrypoint( Class<T> entryClass )
     {
-        //Thread.currentThread().setContextClassLoader( systemBundle.getClass().getClassLoader() );
-
         ServiceTracker tracker = null;
         try
         {
@@ -176,9 +182,9 @@ public class OSGiFebo implements Febo {
 
             T service = ( T ) tracker.waitForService( 2000 );
             if (service == null) {
-                throw new IllegalStateException( "Entrypoint " + entryClass.getName() + " is not available." );
+                return Optional.empty();
             }
-            return service;
+            return Optional.of(service);
         }
         catch ( Exception e )
         {
@@ -190,45 +196,16 @@ public class OSGiFebo implements Febo {
         }
     }
 
-    /**
-     * Marks the end of preparing the instance.
-     * By this time, dependencies must have met and the entrypoint must be reachable.
-     * Otherwise this will raise an exception.
-     */
-    @Override
-    public synchronized void run(String[] args) throws Exception
-    {
-        boolean success = false;
-        Instant t = Instant.now();
-
-        try
-        {
-            start();
-            for (Map.Entry<String, Handle> entry : blobindex.entrySet()) {
-                Bundle b = systemBundle.getBundleContext().installBundle(  blobstore.getLocation(entry.getValue()).toASCIIString(),blobstore.load(entry.getValue()) );
-                LOG.debug("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
-                //scan(b);
-            }
-            success = bounce();
-            if (success)
-            {
-                FeboEntrypoint entry = entrypoint( FeboEntrypoint.class );
-                //System.out.println("System booted in " + Duration.between(t, Instant.now()).toMillis() + " ms.");
-                entry.execute( args, System.in, System.out, System.err );
-            }
-            String version = systemBundle.getHeaders().get( Constants.BUNDLE_VERSION );
-            LOG.info("\u001B[36mBooted FEBO on Apache Felix " + version + " in " + Duration.between(t, Instant.now()).toMillis() + " ms.\u001B[0m \u001B[0m\r\n");
-        }finally
-        {
-            if (!success || !keepRunning)
-            {
-                close();
-            }
+    private void callEntrypoint(String[] args) {
+        Optional<FeboEntrypoint> entry = entrypoint( FeboEntrypoint.class );
+        if (entry.isPresent()) {
+            LOG.info("Entrypoint is " + entry.getClass().getName());
+            entry.get().execute(args, System.in, System.out, System.err);
         }
     }
 
     @Override
-    public <T> T service(Class<T> clazz) throws Exception {
+    public <T> Optional<T> service(Class<T> clazz) {
         return entrypoint(clazz);
     }
 
@@ -259,12 +236,6 @@ public class OSGiFebo implements Febo {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public Febo keepRunning(boolean keepRunning) {
-        this.keepRunning = keepRunning;
-        return this;
     }
 
 }

@@ -1,8 +1,8 @@
-buildscript{
+buildscript {
     repositories {
         mavenLocal()
     }
-    dependencies{
+    dependencies {
         classpath 'org.tablerocket.febo:febo-gradle-plugin:0.1.0-SNAPSHOT'
     }
 }
@@ -29,7 +29,6 @@ febo {
     buildBaseline true
     buildRepository true
 }
-
 dependencies {
     api project(':febo-api')
 
@@ -39,23 +38,30 @@ dependencies {
     repository 'org.apache.felix:org.apache.felix.scr:2.1.16'
     repository 'org.osgi:org.osgi.util.promise:1.1.1'
     repository 'org.osgi:org.osgi.util.function:1.1.0'
-    repository 'org.osgi:org.osgi.service.jaxrs:1.0.0'
-    repository 'org.apache.servicemix.specs:org.apache.servicemix.specs.annotation-api-1.3:1.3_1'
-    repository 'org.apache.servicemix.specs:org.apache.servicemix.specs.json-api-1.1:2.9.0'
-    repository 'javax.json.bind:javax.json.bind-api:1.0'
-    repository 'org.apache.felix:org.apache.felix.http.servlet-api:1.1.2'
-    repository 'org.apache.felix:org.apache.felix.http.whiteboard:4.0.0'
-    repository 'org.apache.aries.spec:org.apache.aries.javax.jax.rs-api:1.0.0'
-    repository 'org.apache.felix:org.apache.felix.http.jetty:4.0.8'
-    repository 'org.apache.aries.jax.rs:org.apache.aries.jax.rs.whiteboard:1.0.4'
 
-    baseline (group: "org.osgi", name: "org.osgi.service.jaxrs", version: '1.0.0', transitive: false)
-    baseline (group: "org.osgi", name: "osgi.core", version: '7.0.0', transitive: false)
-    baseline (group: "org.osgi", name: "osgi.cmpn", version: '7.0.0', transitive: false)
-    baseline (group: "org.apache.aries.spec", name: "org.apache.aries.javax.jax.rs-api", version: "1.0.0", transitive: false)
-    baseline (group: 'org.osgi', name: 'org.osgi.annotation.bundle', version: '1.0.0', transitive: false)
-    baseline (group: "org.tablerocket.febo", name: "febo-api", version: "0.1.0-SNAPSHOT", transitive: false)
+    /**
+
+     repository 'org.osgi:org.osgi.service.jaxrs:1.0.0'
+     repository 'org.apache.servicemix.specs:org.apache.servicemix.specs.annotation-api-1.3:1.3_1'
+     repository 'org.apache.servicemix.specs:org.apache.servicemix.specs.json-api-1.1:2.9.0'
+     repository 'javax.json.bind:javax.json.bind-api:1.0'
+     repository 'org.apache.felix:org.apache.felix.http.servlet-api:1.1.2'
+     repository 'org.apache.felix:org.apache.felix.http.whiteboard:4.0.0'
+     repository 'org.apache.aries.spec:org.apache.aries.javax.jax.rs-api:1.0.0'
+     repository 'org.apache.felix:org.apache.felix.http.jetty:4.0.8'
+     repository 'org.apache.aries.jax.rs:org.apache.aries.jax.rs.whiteboard:1.0.4'
+     **/
+
+    baseline(group: "org.osgi", name: "org.osgi.service.jaxrs", version: '1.0.0', transitive: false)
+    baseline(group: "org.osgi", name: "osgi.core", version: '7.0.0', transitive: false)
+    baseline(group: "org.osgi", name: "osgi.cmpn", version: '7.0.0', transitive: false)
+    baseline(group: "org.apache.aries.spec", name: "org.apache.aries.javax.jax.rs-api", version: "1.0.0", transitive: false)
+    baseline(group: 'org.osgi', name: 'org.osgi.annotation.bundle', version: '1.0.0', transitive: false)
+    baseline(group: "org.tablerocket.febo", name: "febo-api", version: "0.1.0-SNAPSHOT", transitive: false)
+    baseline 'org.slf4j:slf4j-api:1.7.26'
+
 }
+
 
 publishing {
     publications {

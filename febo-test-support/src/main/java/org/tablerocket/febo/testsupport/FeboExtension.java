@@ -11,6 +11,7 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class FeboExtension implements ParameterResolver, BeforeEachCallback, AfterEachCallback{
 
@@ -22,8 +23,7 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
         AutoBundleSupport autoBundle = new AutoBundleSupport();
         this.febo = Boot.febo()
                 .platform(new ClasspathRepositoryStore().platform()) // the target platform
-                .require(autoBundle.discover(getClass().getClassLoader())) // domain bundles
-                .keepRunning(true);
+                .require(autoBundle.discover(getClass().getClassLoader())); // domain bundles
 
         if (context.getTestMethod().isPresent()) {
             Method m = context.getTestMethod().get();
@@ -33,7 +33,7 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
                 expose(name, type);
             }
         }
-        febo.run(new String[]{});
+        febo.start();
     }
 
     private void expose(String name, Class<?> type) {
@@ -68,7 +68,12 @@ public class FeboExtension implements ParameterResolver, BeforeEachCallback, Aft
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         try {
-            return febo.service(parameterContext.getParameter().getType());
+            Optional<Object> s = (Optional<Object>)febo.service(parameterContext.getParameter().getType());
+            if (s.isPresent()) {
+                return s.get();
+            }else {
+                throw new ParameterResolutionException("Service " + parameterContext.getParameter().getType() + " did not get resolved.");
+            }
         } catch (Exception e) {
             throw new ParameterResolutionException("Could not aquire service of type " + parameterContext.getParameter().getType().getName());
         }

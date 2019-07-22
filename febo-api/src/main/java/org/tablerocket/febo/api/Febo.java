@@ -3,12 +3,13 @@ package org.tablerocket.febo.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Optional;
 
 public interface Febo extends AutoCloseable {
 
     Febo exposePackage(String p);
 
-    void start();
+    boolean start();
 
     Febo platform(TargetPlatformSpec platform);
 
@@ -22,12 +23,7 @@ public interface Febo extends AutoCloseable {
     @Deprecated
     Febo require(String label, InputStream payload) throws IOException;
 
-    void run(String[] args) throws Exception;
-
-    <T> T service(Class<T> clazz) throws Exception;
-
+    <T> Optional<T> service(Class<T> clazz) throws Exception;
 
     void stop();
-
-    Febo keepRunning(boolean keepRunning);
 }

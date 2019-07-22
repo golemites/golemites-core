@@ -88,6 +88,17 @@ public class AutoBundleSupport
             if (f.isFile()) {
                 return true;
             }
+        } else {
+            // only if its a bundle
+            if (f.isFile()) {
+                // This is way to much..
+                String sn = ""; //TinyBundles.bundle().read(new FileInputStream(f)).getHeader(Constants.BUNDLE_SYMBOLICNAME);
+                if (sn != null) {
+                    // LOG.info("Skipping potential bundle (" + sn + "): " + f.getAbsolutePath());
+                } else {
+                    // LOG.info("Not even a bundle: " + f.getAbsolutePath());
+                }
+            }
         }
         return false;
     }
