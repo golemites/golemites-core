@@ -21,6 +21,9 @@ public class Launcher {
         if (command.isPresent()) {
             LOG.info("Found command, executing..");
             command.get().execute(args,System.in, System.out,System.err);
+            // hard exit
+            System.exit(0);
+
             febo.stop();
         }else {
             LOG.info("Febo is running in server mode.");
