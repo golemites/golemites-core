@@ -1,9 +1,6 @@
 package org.tablerocket.febo.core;
 
 import aQute.lib.io.IO;
-import org.ops4j.store.Handle;
-import org.ops4j.store.Store;
-import org.ops4j.store.StoreFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -14,7 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tablerocket.febo.api.*;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
@@ -24,13 +24,12 @@ import java.util.zip.ZipInputStream;
 
 public class OSGiFebo implements Febo {
     private final static Logger LOG = LoggerFactory.getLogger( OSGiFebo.class );
-    private LinkedHashMap<String,Handle> blobindex = new LinkedHashMap<>(  );
-    private final Store<InputStream> blobstore;
+    private Map<String,Dependency> deps = new LinkedHashMap<>(  );
     private Framework systemBundle;
     private Set<String> packagesExposed = new HashSet<>();
 
     public OSGiFebo() {
-        this.blobstore = StoreFactory.defaultStore();
+        //this.blobstore = StoreFactory.defaultStore();
     }
 
     public static Febo febo() {
@@ -58,8 +57,8 @@ public class OSGiFebo implements Febo {
                 + "(__)  (____)(____/ \\__/ \u001B[0m \u001B[0m\n");
 
             systemBundle.start();
-            for (Map.Entry<String, Handle> entry : blobindex.entrySet()) {
-                Bundle b = systemBundle.getBundleContext().installBundle(  blobstore.getLocation(entry.getValue()).toASCIIString(),blobstore.load(entry.getValue()) );
+            for (Map.Entry<String, Dependency> entry : deps.entrySet()) {
+                Bundle b = systemBundle.getBundleContext().installBundle( entry.getKey() ,entry.getValue().getLocation().toURL().openStream() );
                 LOG.debug("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
                 //scan(b);
             }
@@ -123,28 +122,14 @@ public class OSGiFebo implements Febo {
     @Override
     public Febo require(Dependency... identifiers)
     {
-        try
+        for (Dependency identifier : identifiers)
         {
-            for (Dependency identifier : identifiers)
-            {
-                LOG.debug("Adding platform dependency: " + identifier.getLocation().toASCIIString());
-                blobindex.put( identifier.getIdentity(),
-                    this.blobstore.store( identifier.getLocation().toURL().openStream() ) );
-            }
-            return this;
-        }
-        catch ( IOException e )
-        {
-            throw new RuntimeException(e);
-        }
+            LOG.debug("Adding platform dependency: " + identifier.getLocation().toASCIIString());
+            deps.put( identifier.getIdentity(),identifier);
 
-    }
-
-    @Override
-    public Febo require(String label, InputStream payload) throws IOException
-    {
-        blobindex.put( label,blobstore.store( payload ) );
+        }
         return this;
+
     }
 
     private boolean bounce()
