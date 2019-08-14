@@ -9,6 +9,12 @@ import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
 public class Containerize {
+    private final String name;
+
+    public Containerize(String name) {
+        this.name = name;
+    }
+
     public String containerize(File output) throws IOException {
         // TODO: add dependencies into separate layers.
         try {
@@ -17,7 +23,7 @@ public class Containerize {
                     .setEntrypoint("/usr/bin/java", "-jar", "/" + output.getName())
                     .setCreationTime(Instant.now())
                     .containerize(
-                            Containerizer.to(DockerDaemonImage.named("foo:latest")
+                            Containerizer.to(DockerDaemonImage.named(name + ":latest")
                             ));
             return result.getImageId().getHash();
         } catch (InterruptedException | RegistryException | CacheDirectoryCreationException | ExecutionException | InvalidImageReferenceException e) {
