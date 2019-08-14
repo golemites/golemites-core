@@ -43,7 +43,7 @@ public class GenerateFeboAppJarTask extends DefaultTask {
         File output = new File(getProject().getBuildDir(), "libs/" + getProject().getName() + "-runner.jar");
         TargetPlatformSpec spec = buildRunnerJar(output);
         getLogger().info("Written a jar file to " + output.getAbsolutePath());
-        String hash = new Containerize(getProject().getName()).containerize(output);
+        String hash = new ImageBuilder(getProject().getName()).containerize(output);
         getLogger().info("Written Image " + hash + " with name "+ getProject().getName());
     }
 
