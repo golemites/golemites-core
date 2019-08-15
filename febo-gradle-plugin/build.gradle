@@ -28,6 +28,7 @@ dependencies {
     compile project(':febo-repository')
     compile project(':febo-autobundle')
     compile project(':febo-osgi-launcher')
+    compile project(':febo-container-support')
 
     compile 'com.squareup:javapoet:1.11.1'
     compile libraries.osgi_framework
@@ -37,11 +38,8 @@ dependencies {
     compile 'org.ow2.asm:asm-commons:7.1'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
 
-    testCompile gradleTestKit()
-    testCompile 'junit:junit:4.12'
-    testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
-        exclude module: 'groovy-all'
-    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.0'
 }
 
 gradlePlugin {

@@ -6,6 +6,7 @@ include "febo-autobundle"
 include "febo-osgi-launcher"
 include "febo-gradle-plugin"
 include "febo-test-support"
+include "febo-container-support"
 if (baseline == "true") {
     println "Building example surfaces.."
     include "febo-example-baseline"
