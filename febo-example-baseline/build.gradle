@@ -29,6 +29,7 @@ febo {
     buildBaseline true
     buildRepository true
 }
+
 dependencies {
     api project(':febo-api')
 
@@ -55,8 +56,7 @@ dependencies {
     baseline(group: "org.apache.aries.spec", name: "org.apache.aries.javax.jax.rs-api", version: "1.0.0", transitive: false)
     baseline(group: 'org.osgi', name: 'org.osgi.annotation.bundle', version: '1.0.0', transitive: false)
     baseline(group: "org.tablerocket.febo", name: "febo-api", version: "0.1.0-SNAPSHOT", transitive: false)
-    baseline 'org.slf4j:slf4j-api:1.7.26'
-
+    baseline libraries.slf4j_api
 }
 
 

@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     api project(':febo-api')
-    compile 'org.slf4j:slf4j-api:1.7.26'
+    compile libraries.slf4j_api
 
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
     testCompile 'org.assertj:assertj-core:3.9.0'

@@ -23,11 +23,11 @@ dependencies {
     compile project(':febo-repository')
     //compile libraries.tinybundles
     compile libraries.felix
-    //compile libraries.osgi_annotation
+    compile libraries.slf4j_simple
+      //compile libraries.osgi_annotation
     //implementation 'com.google.guava:guava:27.1-jre'
     //implementation 'org.ocpsoft.prettytime:prettytime:4.0.2.Final'
     //compile 'com.squareup.okio:okio:1.17.3'
-    compile 'org.slf4j:slf4j-simple:1.7.26'
 
 }
 
