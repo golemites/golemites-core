@@ -6,16 +6,19 @@ def guavaVersion = '20.0'
 def lombokVersion = '1.18.4'
 def osgiVersion = '7.0.0'
 def tinybundlesVersion = '3.0.1-SNAPSHOT'
+def felixVersion = '6.0.3'
+def slf4jVersion = '1.7.26'
+def osgiFrameworkApiVersion = '1.9.0'
 
 rootProject.ext {
     libraries = [
             lombok                     : [group: "org.projectlombok", name: "lombok", version: lombokVersion, transitive: true],
             osgi_compendium            : [group: "org.osgi", name: "osgi.cmpn", version: osgiVersion, transitive: false],
-            osgi_framework             : [group: "org.osgi", name: "org.osgi.framework", version: "1.9.0", transitive: false],
-            osgi_annotation             : [group: "org.osgi", name: "osgi.annotation", version: osgiVersion, transitive: false],
+            osgi_framework             : [group: "org.osgi", name: "org.osgi.framework", version: "$osgiFrameworkApiVersion", transitive: false],
+            osgi_annotation            : [group: "org.osgi", name: "osgi.annotation", version: osgiVersion, transitive: false],
             integrity                  : [group: "org.rebaze.integrity", name: "org.rebaze.integrity.tree", version: integrityVersion, transitive: false],
             tinybundles                : 'org.ops4j.pax.tinybundles:tinybundles:' + tinybundlesVersion,
-            felix                      : 'org.apache.felix:org.apache.felix.framework:6.0.3'
-
+            felix                      : "org.apache.felix:org.apache.felix.framework:$felixVersion",
+            slf4j_api                  : "org.slf4j:slf4j-api:${slf4jVersion}"
     ]
 }
