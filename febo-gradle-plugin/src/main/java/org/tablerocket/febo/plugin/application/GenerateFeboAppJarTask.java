@@ -8,6 +8,7 @@ import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.tasks.TaskAction;
 import org.tablerocket.febo.api.DelayedBuilder;
 import org.tablerocket.febo.api.Dependency;
+import org.tablerocket.febo.api.FeboApplicationExtension;
 import org.tablerocket.febo.api.TargetPlatformSpec;
 import org.tablerocket.febo.autobundle.AutoBundleSupport;
 import org.tablerocket.febo.launcher.Launcher;
@@ -38,13 +39,22 @@ import static org.tablerocket.febo.repository.ClasspathRepositoryStore.BLOB_FILE
 
 public class GenerateFeboAppJarTask extends DefaultTask {
 
+    private FeboApplicationExtension feboExtension;
+
     @TaskAction
     public void exec() throws IOException, URISyntaxException {
         File output = new File(getProject().getBuildDir(), "libs/" + getProject().getName() + "-runner.jar");
         TargetPlatformSpec spec = buildRunnerJar(output);
+
         getLogger().info("Written a jar file to " + output.getAbsolutePath());
-        String hash = new ImageBuilder(getProject().getName()).containerize(output);
-        getLogger().info("Written Image " + hash + " with name "+ getProject().getName());
+        feboExtension = getProject().getExtensions().getByType(FeboApplicationExtension.class);
+        if (feboExtension.isDeployImage()) {
+            String hash = new ImageBuilder(getProject().getName(),feboExtension).containerize(output);
+            getLogger().info("Written Image " + hash + " with name " + getProject().getName());
+            getLogger().info("Image Repo ist " + feboExtension.getRepository());
+        }else {
+            getLogger().info("Skipped creating and deploying for " + getProject().getName());
+        }
     }
 
     private TargetPlatformSpec buildRunnerJar(File output) throws IOException, URISyntaxException {
