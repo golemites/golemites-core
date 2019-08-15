@@ -24,19 +24,16 @@ repositories {
 }
 
 dependencies {
-    compile project(':febo-core')
-    compile project(':febo-repository')
-    compile project(':febo-autobundle')
-    compile project(':febo-osgi-launcher')
+    compile project(':febo-api')
     compile project(':febo-container-support')
-
     compile 'com.squareup:javapoet:1.11.1'
-    compile libraries.osgi_framework
-    compile libraries.integrity
-    compile libraries.tinybundles
-    compile 'com.squareup.okio:okio:1.13.0'
-    compile 'org.ow2.asm:asm-commons:7.1'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+
+    //compile libraries.osgi_framework
+    //compile libraries.integrity
+    //compile libraries.tinybundles
+    //compile 'com.squareup.okio:okio:1.13.0'
+    //compile 'org.ow2.asm:asm-commons:7.1'
+    //compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.0'
