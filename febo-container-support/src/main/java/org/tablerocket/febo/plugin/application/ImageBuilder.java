@@ -87,6 +87,7 @@ public class ImageBuilder {
             calculateAutobundles(projectConf, jos, platformSpec);
             // Calculate new platform blob file
             writeBlob(platformSpec, jos);
+            System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(platformSpec));
             return platformSpec;
         }
     }
@@ -116,7 +117,6 @@ public class ImageBuilder {
             String name = "APPLICATION/" + bundle.getIdentity() + ".jar";
             JarEntry targetName = new JarEntry(name);
             addAll(bundle.getLocation(), targetName, jos);
-            deps.add(bundle);
             bundle.setLocation(new URI(name));
             deps.add(bundle);
         }

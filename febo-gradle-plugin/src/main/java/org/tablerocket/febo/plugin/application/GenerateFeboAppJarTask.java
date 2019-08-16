@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,15 +30,17 @@ public class GenerateFeboAppJarTask extends DefaultTask {
         Optional<ResolvedArtifact> launcher = buildscriptConf.getResolvedConfiguration().getResolvedArtifacts().stream().filter(art -> "febo-osgi-launcher".equals(art.getName())).findAny();
         if (!launcher.isPresent()) throw new RuntimeException("Launcher artifact is not present in dependency set.");
 
-        List<URI> artifacts = new ArrayList<>();
         Configuration projectConf = getProject().getConfigurations().getByName("compileClasspath");
+
+        List<URI> artifactsAll = new ArrayList<>();
         for (ResolvedArtifact artifact : projectConf.getResolvedConfiguration().getResolvedArtifacts()) {
-            if (artifact.getFile().isFile()) {
-                artifacts.add(artifact.getFile().toURI());
-            }
+            artifactsAll.add(artifact.getFile().toURI());
         }
+        List<URI> artifacts = new ArrayList<>(new LinkedHashSet<>(artifactsAll));
+
         URI itself = new File(getProject().getBuildDir().getAbsolutePath() + "/classes/java/main").toURI();
         artifacts.add(itself);
+        artifacts.forEach( t -> getLogger().info(" ------> " + t.toASCIIString()));
         TargetPlatformSpec spec = imageBuilder.buildRunnerJar(output,launcher.get().getFile().toURI(),artifacts);
 
         getLogger().info("Written a jar file to " + output.getAbsolutePath());

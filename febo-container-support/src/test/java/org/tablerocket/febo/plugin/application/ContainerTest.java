@@ -23,7 +23,7 @@ public class ContainerTest {
     @Test
     public void uploadTest() throws IOException {
         FeboApplicationExtension ext = new FeboApplicationExtension();
-        ext.setRepository("rebaze-camp-dev.jfrog.io/app:latest");
+        ext.setRepository("eu.gcr.io/golemite/app:latest");
         //ext.setRepository("quay.io/rebaze/camp-dev:latest");
         ImageBuilder imageBuilder = new ImageBuilder("sample",ext);
 
