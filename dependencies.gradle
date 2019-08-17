@@ -1,5 +1,5 @@
-ext.junitPlatformVersion = '1.5.0'
-ext.junitJupiterVersion = '5.5.0'
+ext.junitPlatformVersion = '1.5.1'
+ext.junitJupiterVersion = '5.5.1'
 ext.log4jVersion = '2.9.0'
 def integrityVersion = '0.4.0-SNAPSHOT'
 def tinybundlesVersion = '3.0.1-SNAPSHOT'
