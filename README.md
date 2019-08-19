@@ -1,11 +1,13 @@
 [![OSGi powered](https://img.shields.io/badge/OSGi-powered-blue.svg)](http://www.osgi.org)
 [![Apache 2.0](https://img.shields.io/github/license/nebula-plugins/nebula-publishing-plugin.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-# Febo
+# Golemites
 
-Febo is a concept study for alternative ways to develop modular software.
+project@golemites.org
 
-Febo stands for "Felix Boot" but the project has evolved since that, so it is not really meaning that anymore.
+Golemites is a concept study for alternative ways to develop modular software.
+
+Formerly, this project was known as Febo" which stands for "Felix Boot" but the project has evolved since that, so it is not really meaning that anymore.
 
 It is a set of independent concepts that may or may not make sense altogether at the moment.
 
