@@ -1,7 +1,15 @@
 package org.tablerocket.febo.plugin.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.cloud.tools.jib.api.*;
+import com.google.cloud.tools.jib.api.AbsoluteUnixPath;
+import com.google.cloud.tools.jib.api.Containerizer;
+import com.google.cloud.tools.jib.api.DockerDaemonImage;
+import com.google.cloud.tools.jib.api.ImageReference;
+import com.google.cloud.tools.jib.api.Jib;
+import com.google.cloud.tools.jib.api.JibContainer;
+import com.google.cloud.tools.jib.api.JibContainerBuilder;
+import com.google.cloud.tools.jib.api.RegistryImage;
+import com.google.cloud.tools.jib.api.TarImage;
 import com.google.cloud.tools.jib.frontend.CredentialRetrieverFactory;
 import okio.BufferedSink;
 import okio.Okio;
@@ -32,15 +40,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 import java.util.zip.ZipException;
 
 import static org.tablerocket.febo.repository.ClasspathRepositoryStore.BLOB_FILENAME;
@@ -101,18 +106,22 @@ public class ImageBuilder {
 
             // Write final launcher with spec included.
             assembleJar(output, launcher, inputSpec);
-
+            File specPath = new File(targetBase,"CONFIGURATION/" +BLOB_FILENAME);
+            specPath.getParentFile().mkdirs();
+            writeBlob(inputSpec,specPath);
             System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(inputSpec));
 
             if (config.isDeployImage()) {
                 // BUILD IMAGE
                 JibContainerBuilder containerBuilder = Jib.from(BASE_IMAGE);
-                containerBuilder.addLayer(Collections.singletonList(output.toPath()), AbsoluteUnixPath.get("/"));
+                Path launcherPath = new File(launcher).toPath();
+                containerBuilder.addLayer(Collections.singletonList(launcherPath), AbsoluteUnixPath.get("/"));
                 containerBuilder.addLayer(deps, AbsoluteUnixPath.get("/PLATFORM"));
                 containerBuilder.addLayer(appPaths, AbsoluteUnixPath.get("/APPLICATION"));
+                containerBuilder.addLayer(Collections.singletonList(specPath.toPath()), AbsoluteUnixPath.get("/CONFIGURATION"));
 
                 containerBuilder.setCreationTime(Instant.now());
-                containerBuilder.setEntrypoint(JAVA_PATH, "-jar", "/" + output.getName());
+                containerBuilder.setEntrypoint(JAVA_PATH, "-jar", "/" + launcherPath.getFileName().toString());
                 ImageReference ref = ImageReference.parse(config.getRepository());
                 // Stack it all together:
                 if (config.getPushTo() == PushTarget.REGISTRY) {
@@ -155,6 +164,13 @@ public class ImageBuilder {
         jos.putNextEntry(new JarEntry(BLOB_FILENAME));
         ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(jos, targetPlatformSpec);
+    }
+
+    private void writeBlob(TargetPlatformSpec targetPlatformSpec, File here) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        try (FileOutputStream fos = new FileOutputStream(here)) {
+            mapper.writeValue(fos, targetPlatformSpec);
+        }
     }
 
     private List<Dependency> calculateAutobundles(List<URI> projectConf) throws IOException, URISyntaxException {
