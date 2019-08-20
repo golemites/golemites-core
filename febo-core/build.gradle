@@ -19,24 +19,15 @@ repositories {
 }
 
 dependencies {
-    //compile libraries.osgi_core
     compile project(':febo-api')
     compile libraries.tinybundles
     compile libraries.felix
-    compile 'org.apache.felix:org.apache.felix.resolver:2.0.0'
-    //compile libraries.lombok
     compile libraries.osgi_annotation
-    //implementation 'com.google.guava:guava:27.1-jre'
-    //implementation 'org.ocpsoft.prettytime:prettytime:4.0.2.Final'
-
     compile 'com.squareup.okio:okio:1.17.3'
     testCompile 'org.assertj:assertj-core:3.12.2'
 
-    // JUnit Jupiter API and TestEngine implementation
     testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-
-    // To avoid compiler warnings about @API annotations in JUnit code
     testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
 }
 
