@@ -1,6 +1,5 @@
 package org.tablerocket.febo.core;
 
-import aQute.lib.io.IO;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -9,7 +8,11 @@ import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tablerocket.febo.api.*;
+import org.tablerocket.febo.api.DelayedBuilder;
+import org.tablerocket.febo.api.Dependency;
+import org.tablerocket.febo.api.Febo;
+import org.tablerocket.febo.api.FeboEntrypoint;
+import org.tablerocket.febo.api.TargetPlatformSpec;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,9 +23,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -47,10 +61,9 @@ public class OSGiFebo implements Febo {
     }
 
     @Override
-    public boolean start()
-    {
+    public boolean start() throws IOException {
         Instant t = Instant.now();
-        IO.delete( new File("felix-cache") );
+        delete( new File("felix-cache") );
         systemBundle = configureFramework();
 
         try {
@@ -72,6 +85,15 @@ public class OSGiFebo implements Febo {
         } catch (BundleException | IOException e) {
             throw new RuntimeException("OSGI Framework did not boot..",e);
         }
+    }
+
+    private void delete(File file) throws IOException {
+        Path pathToBeDeleted = file.toPath();
+
+        Files.walk(pathToBeDeleted)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
     }
 
     private InputStream open(Dependency dependency) throws FileNotFoundException {
