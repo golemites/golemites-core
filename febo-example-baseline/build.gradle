@@ -3,7 +3,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'org.tablerocket.febo:febo-gradle-plugin:0.1.0-SNAPSHOT'
+        classpath 'org.tablerocket.febo:golemites-baseline-gradle-plugin:0.1.0-SNAPSHOT'
     }
 }
 
@@ -12,7 +12,7 @@ plugins {
     id 'maven-publish'
 }
 
-apply plugin: 'org.tablerocket.febo.plugin'
+apply plugin: 'org.golemites.baseline.plugin'
 
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -25,9 +25,9 @@ repositories {
 }
 
 febo {
-    packageName 'org.tablerocket.example'
-    buildBaseline true
-    buildRepository true
+    packageName = 'org.tablerocket.example'
+    buildBaseline = true
+    buildRepository = true
 }
 
 dependencies {
@@ -56,14 +56,14 @@ dependencies {
     baseline(group: "org.apache.aries.spec", name: "org.apache.aries.javax.jax.rs-api", version: "1.0.0", transitive: false)
     baseline(group: 'org.osgi', name: 'org.osgi.annotation.bundle', version: '1.0.0', transitive: false)
     baseline(group: "org.tablerocket.febo", name: "febo-api", version: "0.1.0-SNAPSHOT", transitive: false)
-    baseline libraries.slf4j_api
+    // baseline libraries.slf4j_api
 }
 
 
 publishing {
     publications {
         prebuilt(MavenPublication) {
-            artifact file("$buildDir/libs/febo-example-baseline-${version}.jar")
+            artifact file("$buildDir/libs/febo-example-baseline-${project.version}.jar")
         }
     }
 }

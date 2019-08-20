@@ -18,4 +18,8 @@ public class TargetPlatformSpec
     @Getter
     @Setter
     private Dependency[] dependencies;
+
+    @Getter
+    @Setter
+    private String imageID;
 }

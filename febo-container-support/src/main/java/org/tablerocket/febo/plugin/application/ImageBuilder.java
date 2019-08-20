@@ -3,12 +3,14 @@ package org.tablerocket.febo.plugin.application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.tools.jib.api.*;
 import com.google.cloud.tools.jib.frontend.CredentialRetrieverFactory;
+import okio.BufferedSink;
 import okio.Okio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tablerocket.febo.api.DelayedBuilder;
 import org.tablerocket.febo.api.Dependency;
 import org.tablerocket.febo.api.FeboApplicationExtension;
+import org.tablerocket.febo.api.PushTarget;
 import org.tablerocket.febo.api.TargetPlatformSpec;
 import org.tablerocket.febo.autobundle.AutoBundleSupport;
 import org.tablerocket.febo.launcher.Launcher;
@@ -19,9 +21,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,10 +40,14 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 import java.util.zip.ZipException;
 
 import static org.tablerocket.febo.repository.ClasspathRepositoryStore.BLOB_FILENAME;
 
+/**
+ * OCI-Image Assembler. No-Fatjar.
+ */
 public class ImageBuilder {
     private final static Logger LOG = LoggerFactory.getLogger(ImageBuilder.class);
 
@@ -55,40 +63,91 @@ public class ImageBuilder {
         this.config = config;
     }
 
-    public String containerize(File output) throws IOException {
-        // TODO: add dependencies into separate layers.
+    public TargetPlatformSpec build(File output, URI launcher, TargetPlatformSpec inputSpec, List<URI> applicationDependencies) {
         try {
-            ImageReference ref = ImageReference.parse(config.getRepository());
-            JibContainer result = Jib.from(BASE_IMAGE)
-                    .addLayer(Collections.singletonList(output.toPath()), AbsoluteUnixPath.get("/"))
-                    .setEntrypoint(JAVA_PATH, "-jar", "/" + output.getName())
-                    .setCreationTime(Instant.now())
-                    .containerize(Containerizer.to(RegistryImage.named(ref)
-                            .addCredentialRetriever(CredentialRetrieverFactory.forImage(ref).dockerConfig())));
-            return result.getImageId().getHash();
-        } catch (InterruptedException | RegistryException | CacheDirectoryCreationException | ExecutionException | InvalidImageReferenceException e) {
-            // getLogger().error("Problem creating image",e);
-            throw new RuntimeException(e);
+            File targetBase = output.getParentFile();
+            targetBase.mkdirs();
+
+            List<Path> deps = new ArrayList<>();
+            for (Dependency d : inputSpec.getDependencies()) {
+                File parent = new File(targetBase,"PLATFORM");
+                parent.mkdirs();
+                File f = new File(parent, d.getIdentity() + ".jar");
+                try (InputStream in = d.getLocation().toURL().openStream(); BufferedSink sink = Okio.buffer(Okio.sink(f))) {
+                    sink.writeAll(Okio.source(in));
+                }
+                LOG.info("Writing " + d.getLocation() + " to PLATFORM/" + f.getName());
+
+                d.setLocation(URI.create("file:///PLATFORM/" + f.getName()));
+                deps.add(f.toPath());
+            }
+
+            List<Dependency> appDeps = calculateAutobundles(applicationDependencies);
+            List<Path> appPaths = new ArrayList<>();
+            for (Dependency d : appDeps) {
+                File localTarget = new File(targetBase,"APPLICATION/" + d.getIdentity() + ".jar");
+                localTarget.getParentFile().mkdirs();
+                try (InputStream in = d.getLocation().toURL().openStream(); BufferedSink sink = Okio.buffer(Okio.sink(localTarget))) {
+                    sink.writeAll(Okio.source(in));
+                }
+                d.setLocation(URI.create("file:///APPLICATION/" + d.getIdentity() + ".jar"));
+                appPaths.add(localTarget.toPath());
+            }
+
+            List<Dependency> allDeps = new ArrayList<>(Arrays.asList(inputSpec.getDependencies()));
+            //List<Path> appPaths = appDeps.stream().map((dep) -> new File(dep.getLocation()).toPath()).collect(Collectors.toList());
+            allDeps.addAll(appDeps);
+            inputSpec.setDependencies(allDeps.toArray(new Dependency[0]));
+
+            // Write final launcher with spec included.
+            assembleJar(output, launcher, inputSpec);
+
+            System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(inputSpec));
+
+            if (config.isDeployImage()) {
+                // BUILD IMAGE
+                JibContainerBuilder containerBuilder = Jib.from(BASE_IMAGE);
+                containerBuilder.addLayer(Collections.singletonList(output.toPath()), AbsoluteUnixPath.get("/"));
+                containerBuilder.addLayer(deps, AbsoluteUnixPath.get("/PLATFORM"));
+                containerBuilder.addLayer(appPaths, AbsoluteUnixPath.get("/APPLICATION"));
+
+                containerBuilder.setCreationTime(Instant.now());
+                containerBuilder.setEntrypoint(JAVA_PATH, "-jar", "/" + output.getName());
+                ImageReference ref = ImageReference.parse(config.getRepository());
+                // Stack it all together:
+                if (config.getPushTo() == PushTarget.REGISTRY) {
+                    JibContainer result = containerBuilder
+                            .containerize(Containerizer.to(RegistryImage.named(ref)
+                                    .addCredentialRetriever(CredentialRetrieverFactory.forImage(ref).dockerConfig())));
+                    inputSpec.setImageID(result.getImageId().getHash());
+                } else if (config.getPushTo() == PushTarget.DOCKER_DAEMON) {
+                    JibContainer result = containerBuilder.containerize(Containerizer.to(DockerDaemonImage.named(ref)));
+                    inputSpec.setImageID(result.getImageId().getHash());
+                } else {
+                     JibContainer result = containerBuilder.containerize(Containerizer.to(TarImage.named(ref).saveTo(new File(targetBase, name + "-image.tar.gz").toPath())));
+                     inputSpec.setImageID(result.getImageId().getHash());
+                }
+            }else {
+                LOG.info("Won't build image because of user configuration.");
+            }
+            return inputSpec;
+        }catch (Exception e) {
+            throw new RuntimeException("Problem!",e);
         }
     }
 
-    public TargetPlatformSpec buildRunnerJar(File output, URI launcher, List<URI> projectConf) throws IOException, URISyntaxException {
-        Set<String> ignore = new HashSet<>(Arrays.asList("META-INF/DEPENDENCIES", "META-INF/MANIFEST.MF", "META-INF/LICENSE", "META-INF/NOTICE"));
-        output.getParentFile().mkdirs();
+    private void writeToLocalDisk(String path, List<Path> deps) {
+
+    }
+
+    private void assembleJar(File output, URI launcher, TargetPlatformSpec inputSpec) throws IOException {
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
         manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, Launcher.class.getName());
         try (JarOutputStream jos = new JarOutputStream(new FileOutputStream(output), manifest)) {
-            // Begin writing jos
+            Set<String> ignore = new HashSet<>(Arrays.asList("META-INF/DEPENDENCIES", "META-INF/MANIFEST.MF", "META-INF/LICENSE", "META-INF/NOTICE"));
             writeLauncherDeps(launcher, ignore, jos);
-            // Add Platform Jars
-            TargetPlatformSpec platformSpec = writePlatformJars(projectConf, jos);
-            // Add Autobundle Jars
-            calculateAutobundles(projectConf, jos, platformSpec);
-            // Calculate new platform blob file
-            writeBlob(platformSpec, jos);
-            System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(platformSpec));
-            return platformSpec;
+            writeBlob(inputSpec, jos);
         }
     }
 
@@ -98,34 +157,33 @@ public class ImageBuilder {
         mapper.writeValue(jos, targetPlatformSpec);
     }
 
-    private void calculateAutobundles(List<URI> projectConf, JarOutputStream jos, TargetPlatformSpec platformBlob) throws IOException, URISyntaxException {
+    private List<Dependency> calculateAutobundles(List<URI> projectConf) throws IOException, URISyntaxException {
         AutoBundleSupport autobundle = new AutoBundleSupport();
         List<URL> potentialAutobundles = new ArrayList<>();
         for (URI art : projectConf) {
             LOG.info("Found Artifact for autobundle: " + art.toASCIIString());
             potentialAutobundles.add(art.toURL());
         }
-        // add itself, too!
-        //potentialAutobundles.add(itselfUri.toURL());
 
         Set<DelayedBuilder<Dependency>> result = autobundle.discover(potentialAutobundles);
-        List<Dependency> deps = new ArrayList<>(Arrays.asList(platformBlob.getDependencies()));
+        List<Dependency> deps = new ArrayList<>();
         for (DelayedBuilder<Dependency> auto : result) {
             // add it
             Dependency bundle = auto.build();
             LOG.info("Writing Autobundle to Fatjar: " + bundle);
             String name = "APPLICATION/" + bundle.getIdentity() + ".jar";
+
             JarEntry targetName = new JarEntry(name);
-            addAll(bundle.getLocation(), targetName, jos);
-            bundle.setLocation(new URI(name));
+            //addAll(bundle.getLocation(), targetName, jos);
+            // do that later..
+            //bundle.setLocation(new URI(name));
+
             deps.add(bundle);
         }
-        platformBlob.setDependencies(deps.toArray(new Dependency[0]));
+        return deps;
     }
 
-    private TargetPlatformSpec writePlatformJars(List<URI> c, JarOutputStream jos) throws IOException, URISyntaxException {
-        boolean foundBlob = false;
-        List<Dependency> deps = new ArrayList<>();
+    public TargetPlatformSpec findSpec(List<URI> c) throws IOException {
         for (URI artifact : c) {
             // here we first need to discover and resolve the existing blob file:
             LOG.info("++ Project artifact: " + artifact.toASCIIString());
@@ -136,28 +194,26 @@ public class ImageBuilder {
                     JarEntry entry = null;
                     while ((entry = jis.getNextJarEntry()) != null) {
                         LOG.debug("Checking " + entry.getName() + " ---- ");
-
                         if (BLOB_FILENAME.equals(entry.getName())) {
-                            ClasspathRepositoryStore repo = new ClasspathRepositoryStore(Okio.buffer(Okio.source(jis)).readByteArray());
-                            for (Dependency dep : repo.platform().getDependencies()) {
-                                String name = "PLATFORM/" + dep.getIdentity() + ".jar";
-                                JarEntry targetName = new JarEntry(name);
-                                addAll(dep.getLocation(), targetName, jos);
-                                dep.setLocation(new URI(name));
-                                deps.add(dep);
-                                LOG.info("Writing Platform to Fatjar: " + dep);
-                            }
-                            foundBlob = true;
+                            return new ClasspathRepositoryStore(Okio.buffer(Okio.source(jis)).readByteArray()).platform();
                         }
                         LOG.debug("Writing entry: " + entry.getName());
                     }
                 }
             }
         }
-        if (!foundBlob) {
-            throw new RuntimeException("There was no platform found in configuration file.");
+        throw new RuntimeException("Spec not found!");
+    }
+
+    private void writeDependencies(JarOutputStream jos, List<Dependency> deps, TargetPlatformSpec repo) throws IOException, URISyntaxException {
+        for (Dependency dep : repo.getDependencies()) {
+            String name = "PLATFORM/" + dep.getIdentity() + ".jar";
+            JarEntry targetName = new JarEntry(name);
+            addAll(dep.getLocation(), targetName, jos);
+            dep.setLocation(new URI(name));
+            deps.add(dep);
+            LOG.info("Writing Platform to Fatjar: " + dep);
         }
-        return asTargetPlatform(deps);
     }
 
     private TargetPlatformSpec asTargetPlatform(List<Dependency> deps) {

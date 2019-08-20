@@ -38,6 +38,7 @@ public class AutoBundleSupport
 
     public Set<DelayedBuilder<Dependency>> discover(List<URL> input) {
         // discover classpath
+        // TODO: Preserve order here!
         Set<DelayedBuilder<Dependency>> bundles = new HashSet<>();
         try {
             File base = new File(".").getCanonicalFile().getParentFile();

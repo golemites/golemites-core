@@ -1,4 +1,4 @@
-package org.tablerocket.febo.synth;
+package org.golemites.baseline.plugin.synth;
 
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
@@ -17,6 +17,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 import static org.objectweb.asm.ClassReader.*;
+import static org.objectweb.asm.ClassReader.SKIP_CODE;
+import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
+import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
 public class DecompileMirror implements Mirror {
 

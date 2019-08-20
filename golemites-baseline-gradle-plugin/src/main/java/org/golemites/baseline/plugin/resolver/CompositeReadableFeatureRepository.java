@@ -1,4 +1,4 @@
-package org.tablerocket.febo.plugin.resolver;
+package org.golemites.baseline.plugin.resolver;
 
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;

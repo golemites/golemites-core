@@ -41,10 +41,6 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        feboPlatformPlugin {
-            id = "org.tablerocket.febo.plugin"
-            implementationClass = "org.tablerocket.febo.plugin.FeboPlugin"
-        }
         feboApplicationPlugin {
             id = "org.tablerocket.febo.application.plugin"
             implementationClass = "org.tablerocket.febo.plugin.application.FeboAppPlugin"

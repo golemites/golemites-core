@@ -1,5 +1,6 @@
 package org.tablerocket.febo.plugin.application;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
@@ -23,8 +24,6 @@ public class GenerateFeboAppJarTask extends DefaultTask {
         FeboApplicationExtension feboExtension = getProject().getExtensions().getByType(FeboApplicationExtension.class);
         ImageBuilder imageBuilder = new ImageBuilder(getProject().getName(),feboExtension);
 
-        File output = new File(getProject().getBuildDir(), "libs/" + getProject().getName() + "-runner.jar");
-
         Configuration buildscriptConf = getProject().getBuildscript().getConfigurations().getByName("classpath");
 
         Optional<ResolvedArtifact> launcher = buildscriptConf.getResolvedConfiguration().getResolvedArtifacts().stream().filter(art -> "febo-osgi-launcher".equals(art.getName())).findAny();
@@ -41,15 +40,12 @@ public class GenerateFeboAppJarTask extends DefaultTask {
         URI itself = new File(getProject().getBuildDir().getAbsolutePath() + "/classes/java/main").toURI();
         artifacts.add(itself);
         artifacts.forEach( t -> getLogger().info(" ------> " + t.toASCIIString()));
-        TargetPlatformSpec spec = imageBuilder.buildRunnerJar(output,launcher.get().getFile().toURI(),artifacts);
+        TargetPlatformSpec input = imageBuilder.findSpec(artifacts);
+        File output = new File(getProject().getBuildDir(), "libs/" + getProject().getName() + "-runner.jar");
+
+        TargetPlatformSpec result = imageBuilder.build(output,launcher.get().getFile().toURI(),input,artifacts);
 
         getLogger().info("Written a jar file to " + output.getAbsolutePath());
-        if (feboExtension.isDeployImage()) {
-            String hash = new ImageBuilder(getProject().getName(),feboExtension).containerize(output);
-            getLogger().info("Written Image " + hash + " with name " + getProject().getName());
-            getLogger().info("Image Repo ist " + feboExtension.getRepository());
-        }else {
-            getLogger().info("Skipped creating and deploying for " + getProject().getName());
-        }
+        getLogger().info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result));
     }
 }

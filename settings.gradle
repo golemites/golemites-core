@@ -5,6 +5,7 @@ include "febo-repository"
 include "febo-autobundle"
 include "febo-osgi-launcher"
 include "febo-gradle-plugin"
+include "golemites-baseline-gradle-plugin"
 include "febo-test-support"
 include "febo-container-support"
 if (baseline == "true") {

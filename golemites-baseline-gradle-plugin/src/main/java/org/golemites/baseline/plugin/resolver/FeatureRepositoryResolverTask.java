@@ -1,10 +1,9 @@
-package org.tablerocket.febo.plugin.resolver;
+package org.golemites.baseline.plugin.resolver;
 
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Source;
-import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
@@ -16,11 +15,15 @@ import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDepen
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static okio.Okio.buffer;
-import static org.tablerocket.febo.plugin.resolver.ArtifactDescriptor.parseGAV;
+import static org.golemites.baseline.plugin.resolver.ArtifactDescriptor.parseGAV;
 
 public class FeatureRepositoryResolverTask {
 

@@ -1,16 +1,18 @@
 package org.tablerocket.febo.plugin
 
-import aQute.bnd.annotation.metatype.Meta
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
+import org.golemites.baseline.plugin.resolver.ArtifactDescriptor
+import org.golemites.baseline.plugin.synth.FlatCopyMirror
+import org.golemites.baseline.plugin.synth.Mirror
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.ResolvedDependency
-import org.gradle.api.component.Artifact
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -24,9 +26,6 @@ import org.tablerocket.febo.api.Dependency
 import org.tablerocket.febo.api.Metadata
 import org.tablerocket.febo.api.RepositoryStore
 import org.tablerocket.febo.api.TargetPlatformSpec
-import org.tablerocket.febo.plugin.resolver.ArtifactDescriptor
-import org.tablerocket.febo.synth.FlatCopyMirror
-import org.tablerocket.febo.synth.Mirror
 
 import javax.lang.model.element.Modifier
 
@@ -85,11 +84,8 @@ class GenerateStaticApiTask extends DefaultTask {
         // Store the very blobstore index for now in a plain file here:
         File db = new File(generatedResourcesDir,"febo-blobs.properties");
         db.getParentFile().mkdirs();
-
-
         // write new format:
         ObjectMapper mapper = new ObjectMapper()
-
         TargetPlatformSpec platform = new TargetPlatformSpec()
 
         List<Dependency> deps = new ArrayList<Dependency>()
@@ -114,6 +110,8 @@ class GenerateStaticApiTask extends DefaultTask {
         // baseline api
         Set<ArtifactDescriptor> baselineArtifacts = new HashSet<>()
         def baselineConfigs = project.configurations.getByName("baseline").resolvedConfiguration.firstLevelModuleDependencies
+        getLogger().warn "+++++++  Aquire baseline : " + baselineConfigs.size()
+
         for (ResolvedDependency rs : baselineConfigs) {
 
             for (ResolvedArtifact art : rs.moduleArtifacts) {

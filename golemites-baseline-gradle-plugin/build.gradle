@@ -1,0 +1,48 @@
+plugins {
+    id "java-library"
+    id "idea"
+    id "groovy"
+    id "java-gradle-plugin"
+    id "io.freefair.lombok" version "3.8.0"
+}
+
+/**
+ This makes IntelliJ load Gradle API Sources properly.
+ **/
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':febo-api')
+    compile 'com.squareup:javapoet:1.11.1'
+
+    compile libraries.osgi_framework
+    compile libraries.integrity
+    compile libraries.tinybundles
+    compile 'com.squareup.okio:okio:1.13.0'
+    compile 'org.ow2.asm:asm-commons:7.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
+}
+
+gradlePlugin {
+    plugins {
+        golemitesBaselinePlugin {
+            id = "org.golemites.baseline.plugin"
+            implementationClass = "org.tablerocket.febo.plugin.FeboPlugin"
+        }
+    }
+}

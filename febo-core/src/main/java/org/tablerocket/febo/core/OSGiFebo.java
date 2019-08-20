@@ -13,8 +13,12 @@ import org.tablerocket.febo.api.*;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
@@ -51,26 +55,39 @@ public class OSGiFebo implements Febo {
 
         try {
             systemBundle.init();
-            System.out.println("\u001B[36m ____  ____  ____   __  \n"
-                + "(  __)(  __)(  _ \\ /  \\ \n"
-                + " ) _)  ) _)  ) _ ((  O )\n"
-                + "(__)  (____)(____/ \\__/ \u001B[0m \u001B[0m\n");
-
             systemBundle.start();
             for (Map.Entry<String, Dependency> entry : deps.entrySet()) {
-                Bundle b = systemBundle.getBundleContext().installBundle( entry.getKey() ,entry.getValue().getLocation().toURL().openStream() );
-                LOG.debug("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " +  b.getLocation());
+                try (InputStream is = open(entry.getValue())) {
+                    Bundle b = systemBundle.getBundleContext().installBundle(entry.getKey(), is);
+                    LOG.debug("Installed " + b.getSymbolicName() + " in version " + b.getVersion() + " from " + b.getLocation());
+                }
                 //scan(b);
             }
             boolean success = bounce();
             if (success) {
                 String version = systemBundle.getHeaders().get( Constants.BUNDLE_VERSION );
-                LOG.info("\u001B[36mBooted FEBO on Apache Felix " + version + " in " + Duration.between(t, Instant.now()).toMillis() + " ms.\u001B[0m \u001B[0m\r\n");
+                LOG.info("\u001B[36mBooted GOLEMITES on Apache Felix " + version + " in " + Duration.between(t, Instant.now()).toMillis() + " ms.\u001B[0m \u001B[0m\r\n");
             }
             return success;
         } catch (BundleException | IOException e) {
             throw new RuntimeException("OSGI Framework did not boot..",e);
         }
+    }
+
+    private InputStream open(Dependency dependency) throws FileNotFoundException {
+        URI location = dependency.getLocation();
+        File local = new File(location);
+        if (!local.exists()) {
+            File relative = new File(".",local.getAbsolutePath());
+            if (relative.exists()) {
+                local = relative;
+            }else {
+                throw new RuntimeException("Cannot load dependency from spec: " + dependency);
+            }
+        }
+        //File local = new File(".",dependency.getLocation().toASCIIString()).getAbsoluteFile();
+        LOG.debug("Trying to install " + local);
+        return new FileInputStream(local);
     }
 
     @SuppressWarnings({"unchecked","rawtypes"})

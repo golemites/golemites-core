@@ -1,4 +1,4 @@
-package org.tablerocket.febo.synth;
+package org.golemites.baseline.plugin.synth;
 
 import okio.BufferedSink;
 import okio.Okio;

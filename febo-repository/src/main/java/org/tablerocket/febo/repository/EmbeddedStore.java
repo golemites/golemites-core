@@ -36,7 +36,7 @@ public class EmbeddedStore implements RepositoryStore
             // rewrite embedded resources
             for (Dependency d : index.getDependencies()) {
                 URI old = d.getLocation();
-                URI newLocation = parseEmbedded(old.toASCIIString());
+                URI newLocation = old; // parseEmbedded(old.toASCIIString());
                 LOG.debug("Rewrite location from " + old.toASCIIString() + " to " + newLocation.toASCIIString());
                 d.setLocation(newLocation);
             }
