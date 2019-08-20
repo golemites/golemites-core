@@ -19,9 +19,7 @@ public class EmbeddedStore implements RepositoryStore
 {
     private final static Logger LOG = LoggerFactory.getLogger(EmbeddedStore.class);
     private static final ObjectMapper mapper = new ObjectMapper();
-
     private final TargetPlatformSpec index;
-
 
     public EmbeddedStore()
     {
@@ -32,7 +30,12 @@ public class EmbeddedStore implements RepositoryStore
     {
         try
         {
-            index = mapper.readValue(ClasspathRepositoryStore.class.getResourceAsStream( path ), TargetPlatformSpec.class);
+            File local = new File("./CONFIGURATION" + path);
+            if (local.exists()) {
+                index = mapper.readValue(local, TargetPlatformSpec.class);
+            }else {
+                index = mapper.readValue(ClasspathRepositoryStore.class.getResourceAsStream(path), TargetPlatformSpec.class);
+            }
             // rewrite embedded resources
             for (Dependency d : index.getDependencies()) {
                 URI old = d.getLocation();
