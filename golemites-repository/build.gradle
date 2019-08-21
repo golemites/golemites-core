@@ -1,0 +1,29 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.compilerArgs += '-parameters'
+}
+
+compileTestJava {
+		options.compilerArgs += '-parameters'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api project(':golemites-api')
+    compile libraries.slf4j_api
+    compile libraries.jackson_all
+    testCompile libraries.assertj
+
+    testCompile libraries.jupiter_api
+    testRuntime libraries.jupiter_engine
+    testCompileOnly libraries.apiguardian
+}

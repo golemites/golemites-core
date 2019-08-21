@@ -11,6 +11,6 @@
 
 # Enforce a full rebuild
 
-export ARTIFACT=febo-example-baseline
+export ARTIFACT=golemites-example-baseline
 
 ./gradlew publishToMavenLocal && ./gradlew :$ARTIFACT:publishToMavenLocal --P baseline=true -i --stacktrace

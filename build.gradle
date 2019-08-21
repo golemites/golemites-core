@@ -14,7 +14,7 @@ plugins {
 }
 
 allprojects {
-	group "org.tablerocket.febo"
+	group "org.golemites"
 	version "0.1.0-SNAPSHOT"
 }
 

@@ -25,26 +25,18 @@ repositories {
 
 dependencies {
     compile project(':golemites-api')
+    compile project(':golemites-container-support')
     compile libraries.javapoet
 
-    compile libraries.osgi_framework
-    compile libraries.integrity
-    compile libraries.tinybundles
-    compile libraries.okio
-    compile libraries.asm_commons
-    compile libraries.jackson_all
-
-    testCompile libraries.assertj
-    testCompile libraries.jupiter_api
-    testRuntime libraries.jupiter_engine
-    testCompileOnly libraries.apiguardian
+    testImplementation libraries.jupiter_api
+    testRuntimeOnly libraries.jupiter_engine
 }
 
 gradlePlugin {
     plugins {
-        golemitesBaselinePlugin {
-            id = "org.golemites.baseline.plugin"
-            implementationClass = "org.golemites.baseline.plugin.BaselinePlugin"
+        golemitesApplicationPlugin {
+            id = "org.golemites.application.plugin"
+            implementationClass = "org.golemites.plugin.application.FeboAppPlugin"
         }
     }
 }

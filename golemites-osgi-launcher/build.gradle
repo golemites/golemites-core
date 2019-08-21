@@ -1,0 +1,51 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.compilerArgs += '-parameters'
+}
+
+compileTestJava {
+		options.compilerArgs += '-parameters'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations.compile.transitive = false
+
+dependencies {
+    compile project(':golemites-api')
+    compile project(':golemites-core')
+    compile project(':golemites-repository')
+    compile libraries.felix
+    compile libraries.slf4j_api
+    compile libraries.slf4j_simple
+    compile libraries.jackson_all
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "org.golemites.launcher.Launcher"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    exclude('META-INF/DEPENDENCIES**')
+    exclude('META-INF/maven/**')
+    exclude('META-INF/LICENSE')
+    exclude('META-INF/NOTICE**')
+    exclude('OSGI-OPT/src/**')
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+test {
+    useJUnitPlatform()
+}
