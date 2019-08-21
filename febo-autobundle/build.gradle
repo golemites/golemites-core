@@ -20,14 +20,10 @@ repositories {
 dependencies {
     api project(':febo-api')
     implementation libraries.tinybundles
-    implementation 'com.google.guava:guava:27.1-jre'
-    implementation 'org.ocpsoft.prettytime:prettytime:4.0.2.Final'
-    implementation 'com.squareup.okio:okio:1.17.3'
+    implementation libraries.okio
 
-    testCompile 'org.assertj:assertj-core:3.12.2'
-    // JUnit Jupiter API and TestEngine implementation
-    testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-
-    // To avoid compiler warnings about @API annotations in JUnit code
-    testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')}
+    testCompile libraries.assertj
+    testCompile libraries.jupiter_api
+    testRuntime libraries.jupiter_engine
+    testCompileOnly libraries.apiguardian
+}

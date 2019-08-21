@@ -22,9 +22,7 @@ dependencies {
     implementation project(':febo-autobundle')
     implementation project(':febo-repository')
 
-    api ("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-
-    // To avoid compiler warnings about @API annotations in JUnit code
-    testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
-    testRuntimeOnly 'org.slf4j:slf4j-simple:1.7.26'
+    api libraries.jupiter_api
+    testCompileOnly libraries.apiguardian
+    testRuntimeOnly libraries.slf4j_simple
 }

@@ -23,12 +23,13 @@ dependencies {
     compile libraries.tinybundles
     compile libraries.felix
     compile libraries.osgi_annotation
-    compile 'com.squareup.okio:okio:1.17.3'
-    testCompile 'org.assertj:assertj-core:3.12.2'
+    compile libraries.okio
 
-    testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-    testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
+    testCompile libraries.assertj
+    testCompile libraries.jupiter_api
+    testRuntime libraries.jupiter_engine
+    testCompileOnly libraries.apiguardian
+    testRuntimeOnly libraries.log4j_core
 }
 
 test {

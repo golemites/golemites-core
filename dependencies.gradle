@@ -9,17 +9,48 @@ def osgiVersion = '7.0.0'
 def felixVersion = '6.0.3'
 def slf4jVersion = '1.7.26'
 def osgiFrameworkApiVersion = '1.9.0'
+def apiguardianVersion = '1.0.0'
+def assertjVersion = '3.9.0'
+def jacksonVersion = '2.9.8'
+def okioVersion = '1.17.3'
+def jibCoreVersion = '0.10.0'
+def asmCommonsVersion = '7.1'
+def log4jCoreVersion = '2.11.1'
+def javapoetVersion = '1.11.1'
 
 rootProject.ext {
     libraries = [
-            lombok                     : [group: "org.projectlombok", name: "lombok", version: lombokVersion, transitive: true],
-            osgi_compendium            : [group: "org.osgi", name: "osgi.cmpn", version: osgiVersion, transitive: false],
-            osgi_framework             : [group: "org.osgi", name: "org.osgi.framework", version: "$osgiFrameworkApiVersion", transitive: false],
-            osgi_annotation            : [group: "org.osgi", name: "osgi.annotation", version: osgiVersion, transitive: false],
-            integrity                  : [group: "org.rebaze.integrity", name: "org.rebaze.integrity.tree", version: integrityVersion, transitive: false],
-            tinybundles                : 'org.ops4j.pax.tinybundles:tinybundles:' + tinybundlesVersion,
-            felix                      : "org.apache.felix:org.apache.felix.framework:$felixVersion",
-            slf4j_api                  : "org.slf4j:slf4j-api:${slf4jVersion}",
-            slf4j_simple               : "org.slf4j:slf4j-simple:${slf4jVersion}"
+            lombok         : [group: "org.projectlombok", name: "lombok", version: lombokVersion, transitive: false],
+            osgi_compendium: [group: "org.osgi", name: "osgi.cmpn", version: osgiVersion, transitive: false],
+            osgi_framework : [group: "org.osgi", name: "org.osgi.framework", version: "$osgiFrameworkApiVersion", transitive: false],
+            osgi_annotation: [group: "org.osgi", name: "osgi.annotation", version: osgiVersion, transitive: false],
+            integrity      : [group: "org.rebaze.integrity", name: "org.rebaze.integrity.tree", version: integrityVersion, transitive: false],
+            jupiter_api    : "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}",
+            jupiter_engine : "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}",
+            apiguardian    : "org.apiguardian:apiguardian-api:${apiguardianVersion}",
+            tinybundles    : "org.ops4j.pax.tinybundles:tinybundles:${tinybundlesVersion}",
+            felix          : "org.apache.felix:org.apache.felix.framework:$felixVersion",
+            slf4j_api      : "org.slf4j:slf4j-api:${slf4jVersion}",
+            slf4j_simple   : "org.slf4j:slf4j-simple:${slf4jVersion}",
+            assertj        : "org.assertj:assertj-core:${assertjVersion}",
+            jackson_all        : [
+                    [group: "com.fasterxml.jackson.core", name: "jackson-core", version: jacksonVersion, transitive: false],
+                    [group: "com.fasterxml.jackson.core", name: "jackson-databind", version: jacksonVersion, transitive: false],
+                    [group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: jacksonVersion, transitive: false],
+            ],
+            jackson_core        : [
+                    [group: "com.fasterxml.jackson.core", name: "jackson-core", version: jacksonVersion, transitive: false]
+            ],
+            jackson_annotations        : [
+                    [group: "com.fasterxml.jackson.core", name: "jackson-annotations", version: jacksonVersion, transitive: false]
+            ],
+            jackson_databind        : [
+                    [group: "com.fasterxml.jackson.core", name: "jackson-databind", version: jacksonVersion, transitive: false]
+            ],
+            okio : "com.squareup.okio:okio:${okioVersion}",
+            jib_core : "com.google.cloud.tools:jib-core:${jibCoreVersion}",
+            asm_commons : "org.ow2.asm:asm-commons:${asmCommonsVersion}",
+            log4j_core :  "org.apache.logging.log4j:log4j-core:${log4jCoreVersion}",
+            javapoet : "com.squareup:javapoet:${javapoetVersion}"
     ]
 }

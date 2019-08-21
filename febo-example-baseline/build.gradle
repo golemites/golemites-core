@@ -3,7 +3,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'org.tablerocket.febo:golemites-baseline-gradle-plugin:0.1.0-SNAPSHOT'
+        classpath "org.tablerocket.febo:golemites-baseline-gradle-plugin:${project.version}"
     }
 }
 
@@ -56,7 +56,6 @@ dependencies {
     baseline(group: "org.apache.aries.spec", name: "org.apache.aries.javax.jax.rs-api", version: "1.0.0", transitive: false)
     baseline(group: 'org.osgi', name: 'org.osgi.annotation.bundle', version: '1.0.0', transitive: false)
     baseline(group: "org.tablerocket.febo", name: "febo-api", version: "0.1.0-SNAPSHOT", transitive: false)
-    // baseline libraries.slf4j_api
 }
 
 

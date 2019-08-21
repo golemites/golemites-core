@@ -20,13 +20,10 @@ repositories {
 dependencies {
     api project(':febo-api')
     compile libraries.slf4j_api
+    compile libraries.jackson_all
+    testCompile libraries.assertj
 
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
-    testCompile 'org.assertj:assertj-core:3.9.0'
-
-    // JUnit Jupiter API and TestEngine implementation
-    testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-
-    // To avoid compiler warnings about @API annotations in JUnit code
-    testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')}
+    testCompile libraries.jupiter_api
+    testRuntime libraries.jupiter_engine
+    testCompileOnly libraries.apiguardian
+}

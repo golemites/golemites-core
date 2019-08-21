@@ -26,21 +26,18 @@ dependencies {
     compile project(':febo-repository')
     compile project(':febo-autobundle')
 
-    compile 'com.google.cloud.tools:jib-core:0.10.0'
+    compile libraries.jib_core
     compile libraries.integrity
     compile libraries.tinybundles
-    compile 'com.squareup.okio:okio:1.13.0'
-    compile 'org.ow2.asm:asm-commons:7.1'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    compile libraries.okio
+    compile libraries.asm_commons
+    compile libraries.jackson_all
 
-    testCompile 'org.assertj:assertj-core:3.12.2'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.0'
-    testRuntimeOnly 'org.apache.logging.log4j:log4j-core:2.11.1'
-    //testRuntimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl:2.11.1'
-    //testRuntimeOnly 'ch.qos.logback:logback-classic:1.2.3'
-
+    testCompile libraries.assertj
+    testCompile libraries.jupiter_api
+    testRuntime libraries.jupiter_engine
+    testCompileOnly libraries.apiguardian
+    testRuntimeOnly libraries.log4j_core
 }
 
 test {
