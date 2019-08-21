@@ -36,7 +36,7 @@ gradlePlugin {
     plugins {
         golemitesApplicationPlugin {
             id = "org.golemites.application.plugin"
-            implementationClass = "org.golemites.plugin.application.FeboAppPlugin"
+            implementationClass = "org.golemites.plugin.application.GolemitesGradlePlugin"
         }
     }
 }

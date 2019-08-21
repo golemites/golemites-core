@@ -117,7 +117,7 @@ public class OSGiFebo implements Febo {
         FrameworkFactory factory = ServiceLoader.load( FrameworkFactory.class ).iterator().next();
         Properties p = new Properties();
         p.put( "org.ops4j.pax.logging.DefaultServiceLog.level","WARN" );
-        exposePackage("org.tablerocket.febo.api");
+        exposePackage("org.golemites.api");
         String extraPackages = String.join(",",packagesExposed);
         p.put( "org.osgi.framework.system.packages.extra",extraPackages );
         return factory.newFramework((Map) p);

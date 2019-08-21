@@ -6,7 +6,7 @@ import org.gradle.api.Task;
 import org.gradle.api.logging.LogLevel;
 import org.golemites.api.GolemitesApplicationExtension;
 
-public class GolemiteGradlePlugin implements Plugin<Project> {
+public class GolemitesGradlePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         project.getLogger().log(LogLevel.INFO,"Creating FEBO Fatjar.");
