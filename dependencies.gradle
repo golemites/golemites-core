@@ -17,6 +17,7 @@ def jibCoreVersion = '0.10.0'
 def asmCommonsVersion = '7.1'
 def log4jCoreVersion = '2.11.1'
 def javapoetVersion = '1.11.1'
+def kubernetesJavaVersion = '5.0.0'
 
 rootProject.ext {
     libraries = [
@@ -51,6 +52,7 @@ rootProject.ext {
             jib_core : "com.google.cloud.tools:jib-core:${jibCoreVersion}",
             asm_commons : "org.ow2.asm:asm-commons:${asmCommonsVersion}",
             log4j_core :  "org.apache.logging.log4j:log4j-core:${log4jCoreVersion}",
-            javapoet : "com.squareup:javapoet:${javapoetVersion}"
+            javapoet : "com.squareup:javapoet:${javapoetVersion}",
+            kubernetes_java : "io.kubernetes:client-java:${kubernetesJavaVersion}"
     ]
 }

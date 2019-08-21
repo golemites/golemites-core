@@ -32,6 +32,7 @@ dependencies {
     compile libraries.okio
     compile libraries.asm_commons
     compile libraries.jackson_all
+    compile libraries.kubernetes_java
 
     testCompile libraries.assertj
     testCompile libraries.jupiter_api
