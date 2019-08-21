@@ -18,7 +18,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RunnerTest
+public class ResolverTest
 {
     @Test
     @Disabled
