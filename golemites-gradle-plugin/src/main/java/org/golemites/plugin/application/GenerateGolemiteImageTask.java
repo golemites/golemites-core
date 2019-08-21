@@ -1,6 +1,7 @@
 package org.golemites.plugin.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.kubernetes.client.ApiException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
@@ -20,9 +21,9 @@ import java.util.Optional;
 public class GenerateGolemiteImageTask extends DefaultTask {
 
     @TaskAction
-    public void exec() throws IOException, URISyntaxException {
+    public void exec() throws IOException, URISyntaxException, ApiException {
         GolemitesApplicationExtension extension = getProject().getExtensions().getByType(GolemitesApplicationExtension.class);
-        ImageBuilder imageBuilder = new ImageBuilder(getProject().getName(),extension);
+        ImageBuilder imageBuilder = new ImageBuilder(extension);
 
         Configuration buildscriptConf = getProject().getBuildscript().getConfigurations().getByName("classpath");
 
@@ -47,5 +48,7 @@ public class GenerateGolemiteImageTask extends DefaultTask {
 
         getLogger().info("Written a jar file to " + output.getAbsolutePath());
         getLogger().info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result));
+
+        imageBuilder.deploy("@sha256:" + result.getImageID());
     }
 }
