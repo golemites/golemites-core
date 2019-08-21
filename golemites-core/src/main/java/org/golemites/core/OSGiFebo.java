@@ -88,12 +88,14 @@ public class OSGiFebo implements Febo {
     }
 
     private void delete(File file) throws IOException {
-        Path pathToBeDeleted = file.toPath();
+        if (file.exists() && file.isDirectory()) {
+            Path pathToBeDeleted = file.toPath();
 
-        Files.walk(pathToBeDeleted)
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
+            Files.walk(pathToBeDeleted)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        }
     }
 
     private InputStream open(Dependency dependency) throws FileNotFoundException {
@@ -120,6 +122,9 @@ public class OSGiFebo implements Febo {
         exposePackage("org.golemites.api");
         String extraPackages = String.join(",",packagesExposed);
         p.put( "org.osgi.framework.system.packages.extra",extraPackages );
+        LOG.warn("Log settings are here: " + new File("log4j.properties" ).getAbsolutePath());
+        p.put( "org.ops4j.pax.logging.property.file",new File("log4j.properties" ).getAbsolutePath());
+
         return factory.newFramework((Map) p);
     }
 
