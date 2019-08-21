@@ -24,7 +24,6 @@ import org.tablerocket.febo.autobundle.AutoBundleSupport;
 import org.tablerocket.febo.launcher.Launcher;
 import org.tablerocket.febo.repository.ClasspathRepositoryStore;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -56,9 +55,8 @@ import static org.tablerocket.febo.repository.ClasspathRepositoryStore.BLOB_FILE
 public class ImageBuilder {
     private final static Logger LOG = LoggerFactory.getLogger(ImageBuilder.class);
 
-    public static final String BASE_IMAGE = "openjdk:8-jre-alpine";
-    public static final String LATEST_VERSION = "latest";
-    public static final String JAVA_PATH = "/usr/bin/java";
+    private static final String BASE_IMAGE = "openjdk:8-jre-alpine";
+    private static final String JAVA_PATH = "/usr/bin/java";
 
     private final String name;
     private final FeboApplicationExtension config;
@@ -145,10 +143,6 @@ public class ImageBuilder {
         }
     }
 
-    private void writeToLocalDisk(String path, List<Path> deps) {
-
-    }
-
     private void assembleJar(File output, URI launcher, TargetPlatformSpec inputSpec) throws IOException {
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
@@ -184,16 +178,8 @@ public class ImageBuilder {
         Set<DelayedBuilder<Dependency>> result = autobundle.discover(potentialAutobundles);
         List<Dependency> deps = new ArrayList<>();
         for (DelayedBuilder<Dependency> auto : result) {
-            // add it
             Dependency bundle = auto.build();
             LOG.info("Writing Autobundle to Fatjar: " + bundle);
-            String name = "APPLICATION/" + bundle.getIdentity() + ".jar";
-
-            JarEntry targetName = new JarEntry(name);
-            //addAll(bundle.getLocation(), targetName, jos);
-            // do that later..
-            //bundle.setLocation(new URI(name));
-
             deps.add(bundle);
         }
         return deps;
@@ -221,23 +207,6 @@ public class ImageBuilder {
         throw new RuntimeException("Spec not found!");
     }
 
-    private void writeDependencies(JarOutputStream jos, List<Dependency> deps, TargetPlatformSpec repo) throws IOException, URISyntaxException {
-        for (Dependency dep : repo.getDependencies()) {
-            String name = "PLATFORM/" + dep.getIdentity() + ".jar";
-            JarEntry targetName = new JarEntry(name);
-            addAll(dep.getLocation(), targetName, jos);
-            dep.setLocation(new URI(name));
-            deps.add(dep);
-            LOG.info("Writing Platform to Fatjar: " + dep);
-        }
-    }
-
-    private TargetPlatformSpec asTargetPlatform(List<Dependency> deps) {
-        TargetPlatformSpec platformSpec = new TargetPlatformSpec();
-        platformSpec.setDependencies(deps.toArray(new Dependency[0]));
-        return platformSpec;
-    }
-
     private void writeLauncherDeps(URI launcher, Set<String> ignore, JarOutputStream jos) throws IOException {
         try (JarInputStream jis = new JarInputStream(launcher.toURL().openStream())) {
             JarEntry entry = null;
@@ -259,26 +228,6 @@ public class ImageBuilder {
 
                 }
             }
-        }
-    }
-
-    private void addAll(URI source, JarEntry entry, JarOutputStream target) throws IOException {
-        BufferedInputStream in = null;
-        try {
-            target.putNextEntry(entry);
-            in = new BufferedInputStream(source.toURL().openStream());
-
-            byte[] buffer = new byte[1024];
-            while (true) {
-                int count = in.read(buffer);
-                if (count == -1)
-                    break;
-                target.write(buffer, 0, count);
-            }
-            target.closeEntry();
-        } finally {
-            if (in != null)
-                in.close();
         }
     }
 }
