@@ -1,48 +1,58 @@
 package org.golemites.plugin.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.kubernetes.client.ApiClient;
+import io.kubernetes.client.ApiException;
+import io.kubernetes.client.Configuration;
+import io.kubernetes.client.apis.CoreV1Api;
+import io.kubernetes.client.models.V1Pod;
+import io.kubernetes.client.models.V1PodList;
+import io.kubernetes.client.util.Config;
 import org.golemites.api.GolemitesApplicationExtension;
 import org.golemites.api.PushTarget;
 import org.golemites.api.TargetPlatformSpec;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ContainerTest {
 
     public static final Logger LOG = LoggerFactory.getLogger(ContainerTest.class);
 
+    @Disabled
     @Test
-    public void uriConverter() throws IOException {
-        File s = new File("APPLICATION/foo.jar");
-        URI uri = URI.create("file:///APPLICATION/foo.jar");
-        assertEquals("file:///APPLICATION/foo.jar",uri.toASCIIString());
-        File f = new File(uri);
-        assertEquals("foo.jar",f.getName());
+    void getPods() throws IOException, ApiException {
+            ApiClient client = Config.defaultClient();
+            Configuration.setDefaultApiClient(client);
+            CoreV1Api api = new CoreV1Api();
 
+            V1PodList list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
+            for (V1Pod item : list.getItems()) {
+                System.out.println(item.getMetadata().getName());
+            }
     }
 
+    @Disabled
     @Test
-    public void imageBuilerTest() throws IOException {
+    public void imageBuilerTest() throws IOException, ApiException {
         // TODO: build synthetic test jars to be used here.
         File out = File.createTempFile("febotest",".jar",new File("build/"));
 
         LOG.info("Wrtiting " + out.getAbsolutePath());
         GolemitesApplicationExtension ext = new GolemitesApplicationExtension();
         //ext.setRepository("rebaze-camp-dev.jfrog.io/app:latest");
-        ext.setRepository("app:latest");
+        ext.setRepository("eu.gcr.io/golemite/application-service");
         ext.setDeployImage(true);
-        ext.setPushTo(PushTarget.DOCKER_DAEMON);
+        ext.setPushTo(PushTarget.REGISTRY);
+        ext.setName("sample");
 
-        ImageBuilder imageBuilder = new ImageBuilder("sample",ext);
+        ImageBuilder imageBuilder = new ImageBuilder(ext);
 
         TargetPlatformSpec spec = imageBuilder.findSpec(Collections.singletonList(new File("./../golemites-example-baseline/build/libs/golemites-example-baseline-0.1.0-SNAPSHOT.jar").toURI()));
 
@@ -57,5 +67,20 @@ public class ContainerTest {
         );
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result));
 
+        imageBuilder.deploy("@sha256:" + result.getImageID());
     }
+
+    @Disabled
+    @Test
+    public void deployTest() throws IOException, ApiException {
+        // TODO: build synthetic test jars to be used here.
+
+        GolemitesApplicationExtension ext = new GolemitesApplicationExtension();
+        ext.setRepository("eu.gcr.io/golemite/application-service");
+        ext.setName("sample");
+
+        ImageBuilder imageBuilder = new ImageBuilder(ext);
+        imageBuilder.deploy("@sha256:07a6e7fc35893ef30ed0d3432cebc490512d1dc651a98d6beb78e1e2d001537c");
+    }
+
 }
