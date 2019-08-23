@@ -8,9 +8,4 @@ include "golemites-gradle-plugin"
 include "golemites-baseline-gradle-plugin"
 include "golemites-test-support"
 include "golemites-container-support"
-if (baseline == "true") {
-    println "Building example surfaces.."
-    include "golemites-example-baseline"
-}
-
 enableFeaturePreview("GRADLE_METADATA")
