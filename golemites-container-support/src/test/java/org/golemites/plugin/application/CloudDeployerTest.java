@@ -24,7 +24,7 @@ public class CloudDeployerTest {
     @Test
     void testResolve() throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         // JIB does not work nicely with non default FileSystem
-        Path root = Files.createTempDirectory(new File(".").toPath(),"workdir").toAbsolutePath();
+        Path root = Files.createTempDirectory(new File("./build/").toPath(),"workdir").toAbsolutePath();
         //FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
         // Create test inputs:
         Path inputs = Files.createDirectories(root.resolve("INPUTS"));
