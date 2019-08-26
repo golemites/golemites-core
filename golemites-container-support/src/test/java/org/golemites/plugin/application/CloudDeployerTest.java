@@ -3,6 +3,8 @@ package org.golemites.plugin.application;
 import com.google.cloud.tools.jib.api.CacheDirectoryCreationException;
 import com.google.cloud.tools.jib.api.InvalidImageReferenceException;
 import com.google.cloud.tools.jib.api.RegistryException;
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
 import org.golemites.api.Dependency;
 import org.golemites.api.GolemitesApplicationExtension;
 import org.golemites.api.PushTarget;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -20,12 +23,12 @@ import java.util.concurrent.ExecutionException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.golemites.api.Dependency.dependency;
 
-public class CloudDeployerTest {
+class CloudDeployerTest {
     @Test
     void testResolve() throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         // JIB does not work nicely with non default FileSystem
         Path root = Files.createTempDirectory(new File("./build/").toPath(),"workdir").toAbsolutePath();
-        //FileSystem fs = Jimfs.newFileSystem(Configuration.unix());
+        //Path root = Jimfs.newFileSystem(Configuration.unix()).getPath("/MYTEST");
         // Create test inputs:
         Path inputs = Files.createDirectories(root.resolve("INPUTS"));
         Path p1 = Files.write(inputs.resolve("DATA1"),"data1".getBytes(StandardCharsets.UTF_8));
