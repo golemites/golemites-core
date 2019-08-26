@@ -130,7 +130,11 @@ public class OSGiFebo implements Febo {
 
     @Override
     public Febo platform(TargetPlatformSpec platform) {
-        return require(platform.getDependencies());
+        require(platform.getDependencies());
+        if (platform.getApplication() != null) {
+            require(platform.getApplication());
+        }
+        return this;
     }
 
     private void kill() {
