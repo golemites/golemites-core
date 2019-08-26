@@ -25,7 +25,7 @@ import static org.golemites.api.Dependency.dependency;
 
 class CloudDeployerTest {
     @Test
-    void testResolve() throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
+    void tetsBuildImage() throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         // JIB does not work nicely with non default FileSystem
         Path root = Files.createTempDirectory(new File("./build/").toPath(),"workdir").toAbsolutePath();
         //Path root = Jimfs.newFileSystem(Configuration.unix()).getPath("/MYTEST");
@@ -52,5 +52,7 @@ class CloudDeployerTest {
         CloudDeployer deployer = new CloudDeployer(launcher,base,config);
         String hash = deployer.createImage(root);
         assertThat(hash).isNotBlank();
+        // expect a file
+        assertThat(base.resolve(config.getName() + "-image.tar.gz")).exists();
     }
 }
