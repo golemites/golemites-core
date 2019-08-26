@@ -9,11 +9,13 @@ import org.golemites.api.GolemitesApplicationExtension;
 public class GolemitesGradlePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
-        project.getLogger().log(LogLevel.INFO,"Creating FEBO Fatjar.");
-        GolemitesApplicationExtension ext = project.getExtensions().create("feboApplication", GolemitesApplicationExtension.class);
+        project.getLogger().log(LogLevel.INFO,"Creating Golemites Deployment");
+        GolemitesApplicationExtension ext = project.getExtensions().create("golemites", GolemitesApplicationExtension.class);
         project.getLogger().info("Created extension " + ext + " with " + ext.getRepository());
-        Task generateFeboJar = project.getTasks().create( "generateFeboJar", GenerateGolemiteImageTask.class);
+        Task installTask = project.getTasks().create( "install", InstallTask.class);
+        Task deployTask = project.getTasks().create( "deploy", DeployTask.class);
         // make compileJava depend on generating sourcecode
-        project.getTasks().getByName("jar").dependsOn(generateFeboJar);
+        deployTask.dependsOn(installTask);
+        project.getTasks().getByName("build").dependsOn(installTask);
     }
 }

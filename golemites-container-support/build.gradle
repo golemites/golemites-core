@@ -35,6 +35,7 @@ dependencies {
     compile libraries.kubernetes_java
 
     testCompile libraries.assertj
+    testCompile libraries.jimfs
     testCompile libraries.jupiter_api
     testRuntime libraries.jupiter_engine
     testCompileOnly libraries.apiguardian

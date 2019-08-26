@@ -48,16 +48,14 @@ public class ContainerTest {
         GolemitesApplicationExtension ext = new GolemitesApplicationExtension();
         //ext.setRepository("rebaze-camp-dev.jfrog.io/app:latest");
         ext.setRepository("eu.gcr.io/golemite/application-service");
-        ext.setDeployImage(true);
         ext.setPushTo(PushTarget.REGISTRY);
         ext.setName("sample");
 
-        ImageBuilder imageBuilder = new ImageBuilder(ext);
+        ImageBuilder imageBuilder = new ImageBuilder(out.toPath());
 
         TargetPlatformSpec spec = imageBuilder.findSpec(Collections.singletonList(new File("./../golemites-example-baseline/build/libs/golemites-example-baseline-0.1.0-SNAPSHOT.jar").toURI()));
 
-        TargetPlatformSpec result = imageBuilder.build(out,
-                new File("./../golemites-osgi-launcher/build/libs/golemites-osgi-launcher-0.1.0-SNAPSHOT.jar").toURI(),
+        TargetPlatformSpec result = imageBuilder.prepare(
                 spec,
                 Arrays.asList(
                         new File("./../../febo-application/application-calculator/build/classes/java/main").toURI(),
@@ -67,7 +65,7 @@ public class ContainerTest {
         );
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result));
 
-        imageBuilder.deploy("@sha256:" + result.getImageID());
+        //imageBuilder.deploy("@sha256:" + result.getImageID());
     }
 
     @Disabled
@@ -79,8 +77,8 @@ public class ContainerTest {
         ext.setRepository("eu.gcr.io/golemite/application-service");
         ext.setName("sample");
 
-        ImageBuilder imageBuilder = new ImageBuilder(ext);
-        imageBuilder.deploy("@sha256:07a6e7fc35893ef30ed0d3432cebc490512d1dc651a98d6beb78e1e2d001537c");
+        ImageBuilder imageBuilder = new ImageBuilder(null);
+        //imageBuilder.("@sha256:07a6e7fc35893ef30ed0d3432cebc490512d1dc651a98d6beb78e1e2d001537c");
     }
 
 }

@@ -1,35 +1,29 @@
 package org.golemites.plugin.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.kubernetes.client.ApiException;
+import org.golemites.api.GolemitesApplicationExtension;
+import org.golemites.api.TargetPlatformSpec;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.tasks.TaskAction;
-import org.golemites.api.GolemitesApplicationExtension;
-import org.golemites.api.TargetPlatformSpec;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 
-public class GenerateGolemiteImageTask extends DefaultTask {
+public class InstallTask extends DefaultTask {
 
     @TaskAction
-    public void exec() throws IOException, URISyntaxException, ApiException {
+    public void exec() throws IOException {
         GolemitesApplicationExtension extension = getProject().getExtensions().getByType(GolemitesApplicationExtension.class);
-        ImageBuilder imageBuilder = new ImageBuilder(extension);
-
-        Configuration buildscriptConf = getProject().getBuildscript().getConfigurations().getByName("classpath");
-
-        Optional<ResolvedArtifact> launcher = buildscriptConf.getResolvedConfiguration().getResolvedArtifacts().stream().filter(art -> "golemites-osgi-launcher".equals(art.getName())).findAny();
-        if (!launcher.isPresent()) throw new RuntimeException("Launcher artifact is not present in dependency set.");
-
+        Path base = getProject().getBuildDir().toPath().resolve("golemites-build");
+        Files.createDirectories(base);
         Configuration projectConf = getProject().getConfigurations().getByName("compileClasspath");
 
         List<URI> artifactsAll = new ArrayList<>();
@@ -41,14 +35,9 @@ public class GenerateGolemiteImageTask extends DefaultTask {
         URI itself = new File(getProject().getBuildDir().getAbsolutePath() + "/classes/java/main").toURI();
         artifacts.add(itself);
         artifacts.forEach( t -> getLogger().info(" ------> " + t.toASCIIString()));
+        ImageBuilder imageBuilder = new ImageBuilder(base);
         TargetPlatformSpec input = imageBuilder.findSpec(artifacts);
-        File output = new File(getProject().getBuildDir(), "libs/" + getProject().getName() + "-runner.jar");
-
-        TargetPlatformSpec result = imageBuilder.build(output,launcher.get().getFile().toURI(),input,artifacts);
-
-        getLogger().info("Written a jar file to " + output.getAbsolutePath());
+        TargetPlatformSpec result = imageBuilder.prepare(input,artifacts);
         getLogger().info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result));
-
-        imageBuilder.deploy("@sha256:" + result.getImageID());
     }
 }
