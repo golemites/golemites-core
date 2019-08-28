@@ -9,6 +9,10 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+/**
+ * Known to cause some issues. Needs further testing.
+ */
+@Deprecated
 public class CollectFromJar implements ContentCollector {
     private final URL location;
     private static final Logger LOG = LoggerFactory.getLogger(CollectFromJar.class);
@@ -22,10 +26,13 @@ public class CollectFromJar implements ContentCollector {
         try (JarInputStream jin = new JarInputStream(location.openStream())) {
             JarEntry jentry = null;
             while ((jentry = jin.getNextJarEntry()) != null) {
+
                 String spec = "jar:" + location + "!/" + jentry.getName();
-                if (jentry.getName().endsWith(".class")) {
+
+                if (!jentry.isDirectory()) {
                     URL url = new URL(spec);
                     map.put(jentry.getName(), url);
+                    LOG.warn(" Adding " + url + " from " + jentry.getLastModifiedTime().toString());
                 }
             }
         }

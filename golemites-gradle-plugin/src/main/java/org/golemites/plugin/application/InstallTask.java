@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 public class InstallTask extends DefaultTask {
@@ -22,22 +22,38 @@ public class InstallTask extends DefaultTask {
     @TaskAction
     public void exec() throws IOException {
         GolemitesApplicationExtension extension = getProject().getExtensions().getByType(GolemitesApplicationExtension.class);
-        Path base = getProject().getBuildDir().toPath().resolve("golemites-build");
-        Files.createDirectories(base);
-        Configuration projectConf = getProject().getConfigurations().getByName("compileClasspath");
+        Path base = Files.createDirectories(getProject().getBuildDir().toPath().resolve("golemites-build"));
+        Configuration dependencies = getProject().getConfigurations().getByName("runtimeClasspath");
 
-        List<URI> artifactsAll = new ArrayList<>();
-        for (ResolvedArtifact artifact : projectConf.getResolvedConfiguration().getResolvedArtifacts()) {
-            artifactsAll.add(artifact.getFile().toURI());
+        //debug();
+        List<URI> artifacts = new ArrayList<>();
+        for (ResolvedArtifact artifact : dependencies.getResolvedConfiguration().getResolvedArtifacts()) {
+            getLogger().warn(" + Include " + artifact.getFile().toURI());
+            artifacts.add(artifact.getFile().toURI());
         }
-        List<URI> artifacts = new ArrayList<>(new LinkedHashSet<>(artifactsAll));
+        // TODO: get the path from gradle instead!
+        URI itself = new File(getProject().getBuildDir().getAbsolutePath() + "/libs/" + getProject().getName() + "-" + getProject().getVersion() + ".jar").toURI();
+        getLogger().warn(" + Include (self) " + itself + " Exists: " + Files.exists(Paths.get(itself)));
 
-        URI itself = new File(getProject().getBuildDir().getAbsolutePath() + "/classes/java/main").toURI();
+
         artifacts.add(itself);
         artifacts.forEach( t -> getLogger().info(" ------> " + t.toASCIIString()));
         ImageBuilder imageBuilder = new ImageBuilder(base);
         TargetPlatformSpec input = imageBuilder.findSpec(artifacts);
         TargetPlatformSpec result = imageBuilder.prepare(input,artifacts);
         getLogger().info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result));
+    }
+
+    private void debug() {
+        for (Configuration c : getProject().getConfigurations()) {
+            getLogger().warn("Examine " + c);
+            try {
+                for (ResolvedArtifact thing : c.getResolvedConfiguration().getResolvedArtifacts()) {
+                    getLogger().warn(" + Examine (" + c.getName() + ") " + thing.getFile().toURI());
+                }
+            }catch(Exception e) {
+                getLogger().warn("Ignoring: " + e.getMessage() + " for " + c);
+            }
+        }
     }
 }

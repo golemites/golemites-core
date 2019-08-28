@@ -1,26 +1,37 @@
 package org.golemites.autobundle;
 
+import org.golemites.api.DelayedBuilder;
+import org.golemites.api.Dependency;
 import org.ops4j.pax.tinybundles.core.TinyBundle;
 import org.ops4j.store.Handle;
 import org.ops4j.store.Store;
+import org.ops4j.store.StoreFactory;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.golemites.api.DelayedBuilder;
-import org.golemites.api.Dependency;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 
-import static org.ops4j.pax.tinybundles.core.TinyBundles.*;
 import static org.golemites.api.Dependency.dependency;
 import static org.golemites.autobundle.Util.findClassesFolder;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.bundle;
+import static org.ops4j.pax.tinybundles.core.TinyBundles.withBnd;
 
 public class AutoBundleSupport
 {
@@ -147,14 +158,14 @@ public class AutoBundleSupport
         {
             try
             {
-                Map<String, URL> map = findResources();
-                Store<InputStream> store = getDefaultStore();
+                Store<InputStream> store = StoreFactory.anonymousStore();
 
                 if (clazz != null) {
                     String name = clazz.getPackage().getName();
                     String prefix = name.replaceAll("\\.", "/");
                     // then filter out the desired content:
 
+                    Map<String, URL> map = findFlatResources();
 
                     List<Map.Entry<String, URL>> list = map.entrySet().stream().filter(
                             entry -> !trimToPrefix || entry.getKey().startsWith(prefix)
@@ -180,24 +191,22 @@ public class AutoBundleSupport
                             bundle.set(Constants.EXPORT_PACKAGE, String.join(",", exports));
                         }
                     }
-
                     for (Map.Entry<String, String> entry : this.headerBnd.entrySet()) {
                         bundle.set(entry.getKey(), entry.getValue());
                     }
-
                     Handle handle = store.store(bundle.build(withBnd()));
-
                     return dependency(name, store.getLocation(handle));
                 }else {
                     String name = calculateName(root);
-
-                    List<Map.Entry<String, URL>> list = new ArrayList<>(map.entrySet());
-
                     TinyBundle bundle = bundle().set(Constants.BUNDLE_SYMBOLICNAME, name);
-                    for (Map.Entry<String, URL> entry : list) {
-                        bundle.add(entry.getKey(), entry.getValue().openStream());
+                    try (JarInputStream jin = new JarInputStream(new FileInputStream(root))) {
+                        JarEntry jentry = null;
+                        while ((jentry = jin.getNextJarEntry()) != null) {
+                            if (!jentry.isDirectory()) {
+                                bundle.add(jentry.getName(),jin);
+                            }
+                        }
                     }
-
                     for (Map.Entry<String, String> entry : this.headerBnd.entrySet()) {
                         bundle.set(entry.getKey(), entry.getValue());
                     }
@@ -228,25 +237,23 @@ public class AutoBundleSupport
             }
         }
 
-        private Map<String, URL> findResources() throws IOException
+        private Map<String, URL> findFlatResources() throws IOException
         {
             if (clazz != null) {
+                LOG.error("Collecting from anchor class " + clazz);
                 ContentCollector collector = selectCollector(clazz);
                 Map<String, URL> map = new HashMap<>();
                 collector.collect(map);
                 return map;
-            }else if (root != null && root.isFile()){
-                ContentCollector collector = new CollectFromJar(root.toURI().toURL());
-                Map<String, URL> map = new HashMap<>();
-                collector.collect(map);
-                return map;
             }else if (root != null && root.isDirectory()){
+                LOG.error("Collecting from folder " + root.getAbsolutePath());
+
                 ContentCollector collector = new CollectFromBase(root);
                 Map<String, URL> map = new HashMap<>();
                 collector.collect(map);
                 return map;
             } else {
-                throw new IllegalStateException("Must be either based on an anchor class or a valid source jar or directory.");
+                throw new IllegalStateException("Must be either based on an anchor class or directory.");
             }
         }
 

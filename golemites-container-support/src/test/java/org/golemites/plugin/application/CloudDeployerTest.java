@@ -9,6 +9,7 @@ import org.golemites.api.Dependency;
 import org.golemites.api.GolemitesApplicationExtension;
 import org.golemites.api.PushTarget;
 import org.golemites.api.TargetPlatformSpec;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -24,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.golemites.api.Dependency.dependency;
 
 class CloudDeployerTest {
+
+    @Disabled
     @Test
     void tetsBuildImage() throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         // JIB does not work nicely with non default FileSystem
