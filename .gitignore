@@ -111,6 +111,7 @@ nb-configuration.xml
 
 # OSX Finder crap
 /.DS_Store
+.DS_Store
 
 /.gradletasknamecache
 
