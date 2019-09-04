@@ -122,10 +122,10 @@ public class CloudDeployer {
         Optional<V1Deployment> oldDeployment = existingDeployment(appsApi);
         if (oldDeployment.isPresent()) {
             LOG.info("Replace existing configuration:" + oldDeployment);
-            appsApi.replaceNamespacedDeployment(config.getName(),config.getNamespace(),deployment,null,null);
+            appsApi.replaceNamespacedDeployment(config.getName(),config.getNamespace(),deployment,null,null,null);
         }else {
             LOG.info("Fresh deployment: " + deployment.getMetadata().getName());
-            V1Deployment result = appsApi.createNamespacedDeployment(config.getNamespace(), deployment, false, null, null);
+            V1Deployment result = appsApi.createNamespacedDeployment(config.getNamespace(), deployment, null, null, null);
         }
     }
 

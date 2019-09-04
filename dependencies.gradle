@@ -17,7 +17,7 @@ def jibCoreVersion = '0.10.0'
 def asmCommonsVersion = '7.1'
 def log4jCoreVersion = '2.11.1'
 def javapoetVersion = '1.11.1'
-def kubernetesJavaVersion = '5.0.0'
+def kubernetesJavaVersion = '6.0.1'
 def jimfsVersion = '1.1'
 
 rootProject.ext {
