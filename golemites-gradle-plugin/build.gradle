@@ -1,7 +1,5 @@
 plugins {
-    id "java-library"
     id "idea"
-    id "groovy"
     id "java-gradle-plugin"
     id "io.freefair.lombok" version "3.8.0"
 }
