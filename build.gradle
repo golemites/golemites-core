@@ -18,7 +18,7 @@ allprojects {
 	version "0.1.0-SNAPSHOT"
 }
 
-subprojects {
+subprojects { p ->
 	apply plugin: 'maven-publish'
 	apply plugin: 'java-library'
 
@@ -26,10 +26,6 @@ subprojects {
 		sourceCompatibility = JavaVersion.VERSION_1_8
 		targetCompatibility = JavaVersion.VERSION_1_8
 		options.compilerArgs += '-parameters'
-	}
-
-	if (new File("$project.projectDir/bnd.bnd").exists()) {
-		apply plugin: 'biz.aQute.bnd.builder'
 	}
 
 	repositories {
@@ -44,15 +40,17 @@ subprojects {
 		archiveClassifier = 'sources'
 	}
 
-	publishing {
-		publications {
-			mavenJava(MavenPublication) {
-				from components.java
-				artifact sourcesJar
+	if (!p.name.contains('gradle-plugin')) {
+		publishing {
+			publications {
+				mavenJava(MavenPublication) {
+					from components.java
+					artifact sourcesJar
+				}
 			}
-		}
-		repositories {
-			mavenLocal()
+			repositories {
+				mavenLocal()
+			}
 		}
 	}
 }
