@@ -164,60 +164,69 @@ public class AutoBundleSupport
                     String name = clazz.getPackage().getName();
                     String prefix = name.replaceAll("\\.", "/");
                     // then filter out the desired content:
-
-                    Map<String, URL> map = findFlatResources();
-
-                    List<Map.Entry<String, URL>> list = map.entrySet().stream().filter(
-                            entry -> !trimToPrefix || entry.getKey().startsWith(prefix)
-                    ).collect(Collectors.toList());
-
-                    TinyBundle bundle = bundle().set(Constants.BUNDLE_SYMBOLICNAME, name);
-                    for (Map.Entry<String, URL> entry : list) {
-                        bundle.add(entry.getKey(), entry.getValue().openStream());
-                    }
-
-                    // Auto Export api packages:
-                    if (autoExportApi) {
-                        Set<String> exports = new HashSet<>();
-                        for (Map.Entry<String, URL> entry : list) {
-                            String pack = entry.getKey()
-                                    .substring(0, entry.getKey().lastIndexOf("/"))
-                                    .replaceAll("/", ".");
-                            if (pack.endsWith(".api")) {
-                                exports.add(pack);
-                            }
-                        }
-                        if (exports.size() > 0) {
-                            bundle.set(Constants.EXPORT_PACKAGE, String.join(",", exports));
-                        }
-                    }
-                    for (Map.Entry<String, String> entry : this.headerBnd.entrySet()) {
-                        bundle.set(entry.getKey(), entry.getValue());
-                    }
-                    Handle handle = store.store(bundle.build(withBnd()));
-                    return dependency(name, store.getLocation(handle));
+                    return build(store, name, prefix);
                 }else {
                     String name = calculateName(root);
-                    TinyBundle bundle = bundle().set(Constants.BUNDLE_SYMBOLICNAME, name);
-                    try (JarInputStream jin = new JarInputStream(new FileInputStream(root))) {
-                        JarEntry jentry = null;
-                        while ((jentry = jin.getNextJarEntry()) != null) {
-                            if (!jentry.isDirectory()) {
-                                bundle.add(jentry.getName(),jin);
+                    if (root.isDirectory()) {
+                        String prefix = name.replaceAll("\\.", "/");
+                        return build(store, name, null);
+                    }else {
+                        TinyBundle bundle = bundle().set(Constants.BUNDLE_SYMBOLICNAME, name);
+                        try (JarInputStream jin = new JarInputStream(new FileInputStream(root))) {
+                            JarEntry jentry = null;
+                            while ((jentry = jin.getNextJarEntry()) != null) {
+                                if (!jentry.isDirectory()) {
+                                    bundle.add(jentry.getName(), jin);
+                                }
                             }
                         }
-                    }
-                    for (Map.Entry<String, String> entry : this.headerBnd.entrySet()) {
-                        bundle.set(entry.getKey(), entry.getValue());
-                    }
+                        for (Map.Entry<String, String> entry : this.headerBnd.entrySet()) {
+                            bundle.set(entry.getKey(), entry.getValue());
+                        }
+
                     Handle handle = store.store(bundle.build(withBnd()));
                     return dependency(name, store.getLocation(handle));
+                    }
                 }
             }
             catch ( IOException e )
             {
                 throw new RuntimeException( e );
             }
+        }
+
+        private Dependency build(Store<InputStream> store, String name, String prefix) throws IOException {
+            Map<String, URL> map = findFlatResources();
+
+            List<Map.Entry<String, URL>> list = map.entrySet().stream().filter(
+                    entry -> !trimToPrefix || prefix == null || entry.getKey().startsWith(prefix)
+            ).collect(Collectors.toList());
+
+            TinyBundle bundle = bundle().set(Constants.BUNDLE_SYMBOLICNAME, name);
+            for (Map.Entry<String, URL> entry : list) {
+                bundle.add(entry.getKey(), entry.getValue().openStream());
+            }
+
+            // Auto Export api packages:
+            if (autoExportApi) {
+                Set<String> exports = new HashSet<>();
+                for (Map.Entry<String, URL> entry : list) {
+                    String pack = entry.getKey()
+                            .substring(0, entry.getKey().lastIndexOf("/"))
+                            .replaceAll("/", ".");
+                    if (pack.endsWith(".api")) {
+                        exports.add(pack);
+                    }
+                }
+                if (exports.size() > 0) {
+                    bundle.set(Constants.EXPORT_PACKAGE, String.join(",", exports));
+                }
+            }
+            for (Map.Entry<String, String> entry : this.headerBnd.entrySet()) {
+                bundle.set(entry.getKey(), entry.getValue());
+            }
+            Handle handle = store.store(bundle.build(withBnd()));
+            return dependency(name, store.getLocation(handle));
         }
 
         private String calculateName(File root) {
