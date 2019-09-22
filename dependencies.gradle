@@ -1,5 +1,5 @@
-def junitPlatformVersion = '1.5.1'
-def junitJupiterVersion = '5.5.1'
+def junitPlatformVersion = '1.5.2'
+def junitJupiterVersion = '5.5.2'
 def log4jVersion = '2.9.0'
 def integrityVersion = '0.4.0-SNAPSHOT'
 def tinybundlesVersion = '3.0.1-SNAPSHOT'
