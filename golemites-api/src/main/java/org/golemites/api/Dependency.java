@@ -13,6 +13,8 @@ public class Dependency
 
     private Metadata metadata;
 
+    private int startlevel = 10;
+
     public static Dependency dependency(String name, URI location) {
         Dependency d = new Dependency();
         d.setIdentity(name);

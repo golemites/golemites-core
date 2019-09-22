@@ -81,7 +81,7 @@ public class CloudDeployer {
         containerBuilder.addLayer(Collections.singletonList(specPath), AbsoluteUnixPath.fromPath(TargetPlatformSpec.configuration(targetBase)));
 
         containerBuilder.setCreationTime(Instant.now());
-        containerBuilder.setEntrypoint(JAVA_PATH, "-jar", "/" + launcherPath.getFileName().toString());
+        containerBuilder.setEntrypoint(JAVA_PATH, "-jar", "/" + launcherPath.getFileName().toString(), "run");
         return deployImage(containerBuilder);
     }
 

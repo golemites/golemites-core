@@ -1,13 +1,7 @@
 package org.golemites.plugin.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
-import io.kubernetes.client.Configuration;
-import io.kubernetes.client.apis.CoreV1Api;
-import io.kubernetes.client.models.V1Pod;
-import io.kubernetes.client.models.V1PodList;
-import io.kubernetes.client.util.Config;
 import org.golemites.api.GolemitesApplicationExtension;
 import org.golemites.api.PushTarget;
 import org.golemites.api.TargetPlatformSpec;
@@ -24,19 +18,6 @@ import java.util.Collections;
 public class ContainerTest {
 
     public static final Logger LOG = LoggerFactory.getLogger(ContainerTest.class);
-
-    @Disabled
-    @Test
-    void getPods() throws IOException, ApiException {
-            ApiClient client = Config.defaultClient();
-            Configuration.setDefaultApiClient(client);
-            CoreV1Api api = new CoreV1Api();
-
-            V1PodList list = api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
-            for (V1Pod item : list.getItems()) {
-                System.out.println(item.getMetadata().getName());
-            }
-    }
 
     @Disabled
     @Test

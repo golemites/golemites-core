@@ -27,6 +27,9 @@ dependencies {
     compile libraries.slf4j_api
     compile libraries.slf4j_simple
     compile libraries.jackson_all
+    compile libraries.args4j
+    compile "ch.qos.logback:logback-core:1.1.7"
+    //runtimeOnly "ch.qos.logback:logback-classic:1.1.7"
 }
 
 jar {

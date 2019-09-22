@@ -19,6 +19,7 @@ def log4jCoreVersion = '2.11.1'
 def javapoetVersion = '1.11.1'
 def kubernetesJavaVersion = '6.0.1'
 def jimfsVersion = '1.1'
+def args4jVersion = '2.33'
 
 rootProject.ext {
     libraries = [
@@ -55,6 +56,8 @@ rootProject.ext {
             log4j_core :  "org.apache.logging.log4j:log4j-core:${log4jCoreVersion}",
             javapoet : "com.squareup:javapoet:${javapoetVersion}",
             kubernetes_java : "io.kubernetes:client-java:${kubernetesJavaVersion}",
-            jimfs : "com.google.jimfs:jimfs:${jimfsVersion}"
+            jimfs : "com.google.jimfs:jimfs:${jimfsVersion}",
+            args4j : "args4j:args4j:${args4jVersion}"
+
     ]
 }
