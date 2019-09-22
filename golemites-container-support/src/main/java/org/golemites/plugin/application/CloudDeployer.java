@@ -18,6 +18,7 @@ import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.Configuration;
 import io.kubernetes.client.apis.AppsV1Api;
+import io.kubernetes.client.apis.CoreV1Api;
 import io.kubernetes.client.custom.IntOrString;
 import io.kubernetes.client.models.V1Container;
 import io.kubernetes.client.models.V1ContainerPort;
@@ -29,6 +30,9 @@ import io.kubernetes.client.models.V1ObjectMeta;
 import io.kubernetes.client.models.V1PodSpec;
 import io.kubernetes.client.models.V1PodTemplateSpec;
 import io.kubernetes.client.models.V1Probe;
+import io.kubernetes.client.models.V1Service;
+import io.kubernetes.client.models.V1ServicePort;
+import io.kubernetes.client.models.V1ServiceSpec;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.Yaml;
 import org.golemites.api.Dependency;
@@ -114,9 +118,20 @@ public class CloudDeployer {
     public void deployApplication(String imageId) throws IOException, ApiException {
         ApiClient client = Config.defaultClient();
         Configuration.setDefaultApiClient(client);
-        AppsV1Api appsApi = new AppsV1Api();
-
+        CoreV1Api coreApi = new CoreV1Api();
         // create:
+        V1Service service = createService();
+        LOG.info(Yaml.dump(service));
+        Optional<V1Service> oldService = existingService(coreApi);
+        if (oldService.isPresent()) {
+            LOG.info("Replace existing service:" + oldService);
+            coreApi.replaceNamespacedService(config.getName(),config.getNamespace(),service,null,null,null);
+        }else {
+            LOG.info("Fresh service: " + service.getMetadata().getName());
+            V1Service result = coreApi.createNamespacedService(config.getNamespace(), service, null, null, null);
+        }
+
+        AppsV1Api appsApi = new AppsV1Api();
         V1Deployment deployment = createDeployment(imageId);
         LOG.info(Yaml.dump(deployment));
         Optional<V1Deployment> oldDeployment = existingDeployment(appsApi);
@@ -127,6 +142,32 @@ public class CloudDeployer {
             LOG.info("Fresh deployment: " + deployment.getMetadata().getName());
             V1Deployment result = appsApi.createNamespacedDeployment(config.getNamespace(), deployment, null, null, null);
         }
+    }
+
+    private Optional<V1Service> existingService(CoreV1Api api) {
+        try {
+            return Optional.of(api.readNamespacedService(config.getName(),config.getNamespace(),null,false,false));
+        } catch (ApiException e) {
+            return Optional.empty();
+        }
+    }
+
+    private V1Service createService() {
+        V1Service service = new V1Service();
+        V1ObjectMeta metadata = new V1ObjectMeta();
+        service.setApiVersion("v1");
+        metadata.setName(config.getName());
+        service.setMetadata(metadata);
+        service.setKind("Service");
+        V1ServiceSpec spec = new V1ServiceSpec();
+        spec.setType("ClusterIP");
+        spec.setSelector(Collections.singletonMap("app",config.getName()));
+        V1ServicePort port = new V1ServicePort();
+        port.setName("http");
+        port.setPort(8080);
+        spec.setPorts(Collections.singletonList(port));
+        service.setSpec(spec);
+        return service;
     }
 
     private Optional<V1Deployment> existingDeployment(AppsV1Api appsApi) {
