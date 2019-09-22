@@ -34,7 +34,12 @@ public class EmbeddedStore implements RepositoryStore
             if (local.exists()) {
                 index = mapper.readValue(local, TargetPlatformSpec.class);
             }else {
-                index = mapper.readValue(ClasspathRepositoryStore.class.getResourceAsStream(path), TargetPlatformSpec.class);
+                if (ClasspathRepositoryStore.class.getResource(path) != null) {
+                    index = mapper.readValue(ClasspathRepositoryStore.class.getResourceAsStream(path), TargetPlatformSpec.class);
+                }else {
+                    throw new RuntimeException("No Platform found to be used.");
+                }
+
             }
             // rewrite embedded resources
             for (Dependency d : index.getDependencies()) {
