@@ -94,13 +94,13 @@ public class CloudDeployer {
         // Stack it all together:
         if (config.getPushTo() == PushTarget.REGISTRY) {
             JibContainer result = containerBuilder.containerize(Containerizer.to(RegistryImage.named(ref)
-                    .addCredentialRetriever(CredentialRetrieverFactory.forImage(ref).dockerConfig())));
+                    .addCredentialRetriever(CredentialRetrieverFactory.forImage(ref,(event) -> {}).dockerConfig())));
             return result.getDigest().getHash();
         } else if (config.getPushTo() == PushTarget.DOCKER_DAEMON) {
             JibContainer result = containerBuilder.containerize(Containerizer.to(DockerDaemonImage.named(ref)));
             return result.getDigest().getHash();
         } else {
-            JibContainer result = containerBuilder.containerize(Containerizer.to(TarImage.named(ref).saveTo(sourceBase.resolve( config.getName() + "-image.tar.gz"))));
+            JibContainer result = containerBuilder.containerize(Containerizer.to(TarImage.at(sourceBase.resolve( config.getName() + "-image.tar.gz")).named(ref)));
             return result.getDigest().getHash();
         }
     }
@@ -125,7 +125,7 @@ public class CloudDeployer {
         Optional<V1Service> oldService = existingService(coreApi);
         if (oldService.isPresent()) {
             LOG.info("Replace existing service:" + oldService);
-            coreApi.replaceNamespacedService(config.getName(),config.getNamespace(),service,null,null,null);
+            // coreApi.replaceNamespacedService(config.getName(),config.getNamespace(),service,null,null,null);
         }else {
             LOG.info("Fresh service: " + service.getMetadata().getName());
             V1Service result = coreApi.createNamespacedService(config.getNamespace(), service, null, null, null);
