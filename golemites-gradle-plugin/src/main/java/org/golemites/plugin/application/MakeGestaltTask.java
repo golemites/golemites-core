@@ -9,10 +9,12 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedDependency;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.rebaze.integrity.tree.api.TreeSession;
 import org.rebaze.integrity.tree.util.DefaultTreeSessionFactory;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
@@ -22,14 +24,22 @@ import java.util.List;
 
 public class MakeGestaltTask extends DefaultTask {
 
+    private File output;
+
+    @Inject
+    public MakeGestaltTask(File output) {
+        this.output = output;
+    }
+
+    @OutputFile
+    public File getOutput() {
+        return output;
+    }
 
     @TaskAction
     public void exec() throws IOException {
         TreeSession session = new DefaultTreeSessionFactory().create();
         ObjectMapper mapper = new ObjectMapper();
-
-        File generatedResourcesDir = new File(getProject().getBuildDir(), "generated/resources");
-        generatedResourcesDir.mkdirs();
 
         GolemitesApplicationExtension extension = getProject().getExtensions().getByType(GolemitesApplicationExtension.class);
         getLogger().info("Running " + getProject().getName() + " gestalt task");
@@ -52,18 +62,10 @@ public class MakeGestaltTask extends DefaultTask {
             platformDeps.add(dependency);
         }
         platform.setDependencies(platformDeps.toArray(new Dependency[0]));
-        getLogger().warn("Output: " + generatedResourcesDir.getAbsolutePath());
         DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
         platform.setBuildTimeUTC(dtf.format(Instant.now()));
-
         getLogger().info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(platform));
-
-
-        mapper.writeValue(new File(generatedResourcesDir,"febo-blobs.json"),platform);
-
-    }
-
-    private void debug() {
-
+        mapper.writeValue(getOutput(),platform);
+        getLogger().info("Output: " + getOutput().getAbsolutePath());
     }
 }
