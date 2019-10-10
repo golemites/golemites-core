@@ -15,12 +15,14 @@ compileTestJava {
 
 repositories {
     mavenCentral()
+    maven { url 'https://repo.gradle.org/gradle/libs-releases' }
 }
 
 dependencies {
     implementation project(':golemites-core')
     implementation project(':golemites-autobundle')
     implementation project(':golemites-repository')
+    api "org.gradle:gradle-tooling-api:5.6.2"
 
     api libraries.jupiter_api
     testCompileOnly libraries.apiguardian
