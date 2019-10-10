@@ -27,6 +27,10 @@ public class TargetPlatformSpec
     @Setter
     private String imageID;
 
+    @Getter
+    @Setter
+    private String buildTimeUTC;
+
     public static Path platformPath(Path base) {
         return base.resolve(PLATFORM);
     }
