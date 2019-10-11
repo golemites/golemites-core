@@ -52,15 +52,11 @@ public class ImageBuilder {
      * Collects are necessary artifacts and forms so that an actual image can be created or started.
      *
      * @param inputSpec platform descriptor.
-     * @param applicationDependencies extra application artifacts.
      * @return a ready to be used flat description of a concrete Application
      */
-    public TargetPlatformSpec prepare(TargetPlatformSpec inputSpec, List<URI> applicationDependencies) {
+    public TargetPlatformSpec prepare(TargetPlatformSpec inputSpec) {
         try {
-            List<Dependency> appDeps = calculateAutobundles(applicationDependencies);
             List<Path> platformArtifacts = install(Arrays.asList(inputSpec.getDependencies()),TargetPlatformSpec.platformPath(targetBase));
-            List<Path> appArtifacts = install(appDeps,TargetPlatformSpec.applicationPath(targetBase));
-            inputSpec.setApplication(appDeps.toArray(new Dependency[0]));
             Path specArtifact = Files.createDirectories(TargetPlatformSpec.configuration(targetBase)).resolve(BLOB_FILENAME);
             writeBlob(inputSpec,specArtifact);
             return inputSpec;
