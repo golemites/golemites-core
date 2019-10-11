@@ -81,7 +81,7 @@ public class CloudDeployer {
         LOG.info("Copy " + launcherPath + " to " + sourceBase);
         containerBuilder.addLayer(Collections.singletonList(launcherPath), AbsoluteUnixPath.fromPath(targetBase));
         containerBuilder.addLayer(mapToPaths(spec.getDependencies()), AbsoluteUnixPath.fromPath(TargetPlatformSpec.platformPath(targetBase)));
-        containerBuilder.addLayer(mapToPaths(spec.getApplication()), AbsoluteUnixPath.fromPath(TargetPlatformSpec.applicationPath(targetBase)));
+        //containerBuilder.addLayer(mapToPaths(spec.getApplication()), AbsoluteUnixPath.fromPath(TargetPlatformSpec.applicationPath(targetBase)));
         containerBuilder.addLayer(Collections.singletonList(specPath), AbsoluteUnixPath.fromPath(TargetPlatformSpec.configuration(targetBase)));
 
         containerBuilder.setCreationTime(Instant.now());
@@ -203,7 +203,7 @@ public class CloudDeployer {
         containers.add(container);
         V1Probe readinessProbe = new V1Probe();
         V1HTTPGetAction action = new V1HTTPGetAction();
-        action.setPath("/foo");
+        action.setPath("/health");
         action.setPort(new IntOrString(8080));
         readinessProbe.setInitialDelaySeconds(5);
         readinessProbe.setHttpGet(action);
