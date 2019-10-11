@@ -1,5 +1,7 @@
 package org.golemites.plugin.application;
 
+import okio.Okio;
+import org.golemites.repository.ClasspathRepositoryStore;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -13,6 +15,9 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Set;
 
 public class GolemitesGradlePlugin implements Plugin<Project> {
@@ -27,10 +32,16 @@ public class GolemitesGradlePlugin implements Plugin<Project> {
 
         File generatedResourcesDir = new File(project.getBuildDir(), "generated/resources");
         generatedResourcesDir.mkdirs();
-        File output = new File(generatedResourcesDir, "febo-blobs.json");
-        Task makeGestalt = project.getTasks().create( "gestalt", MakeGestaltTask.class, output);
+        File spec = new File(generatedResourcesDir, "febo-blobs.json");
+        Task makeGestalt = project.getTasks().create( "gestalt", MakeGestaltTask.class, spec);
+        Path golemitesOutput;
+        try {
+             golemitesOutput = Files.createDirectories(project.getBuildDir().toPath().resolve("golemites-build"));
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot create output folder..");
+        }
 
-        Task installTask = project.getTasks().create( "install", InstallTask.class);
+        Task installTask = project.getTasks().create( "install", InstallTask.class,spec,golemitesOutput.toFile());
         Task deployTask = project.getTasks().create( "deploy", DeployTask.class);
 
         // make compileJava depend on generating sourcecode
@@ -45,6 +56,7 @@ public class GolemitesGradlePlugin implements Plugin<Project> {
 
         //project.getTasks().getByName("build");
         project.getRootProject().getAllprojects().forEach(p -> {
+            p.getTasks().getByName("build").dependsOn(makeGestalt);
             if (p.getTasks().findByName("jar") != null) {
                 if (!p.equals(project)) {
                     project.getLogger().info(makeGestalt.getName() + " depends on " + p.getName());

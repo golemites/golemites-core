@@ -1,46 +1,54 @@
 package org.golemites.plugin.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okio.Okio;
 import org.golemites.api.GolemitesApplicationExtension;
 import org.golemites.api.TargetPlatformSpec;
+import org.golemites.repository.ClasspathRepositoryStore;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 public class InstallTask extends DefaultTask {
+
+    private final File outputFolder;
+    private File input;
+
+    @Inject
+    public InstallTask(File input, File outputFolder) {
+        this.input = input;
+        this.outputFolder = outputFolder;
+    }
+
+    @InputFile
+    public File getInput() {
+        return input;
+    }
+
+    @OutputDirectory
+    public File getOutput() {
+        return outputFolder;
+    }
 
     @TaskAction
     public void exec() throws IOException {
         GolemitesApplicationExtension extension = getProject().getExtensions().getByType(GolemitesApplicationExtension.class);
-        Path base = Files.createDirectories(getProject().getBuildDir().toPath().resolve("golemites-build"));
-        Configuration dependencies = getProject().getConfigurations().getByName("runtimeClasspath");
+        Path base = outputFolder.toPath();
 
-        //debug();
-        List<URI> artifacts = new ArrayList<>();
-        for (ResolvedArtifact artifact : dependencies.getResolvedConfiguration().getResolvedArtifacts()) {
-            getLogger().warn(" + Include " + artifact.getFile().toURI());
-            artifacts.add(artifact.getFile().toURI());
-        }
-        // TODO: get the path from gradle instead!
-        URI itself = new File(getProject().getBuildDir().getAbsolutePath() + "/libs/" + getProject().getName() + "-" + getProject().getVersion() + ".jar").toURI();
-        getLogger().warn(" + Include (self) " + itself + " Exists: " + Files.exists(Paths.get(itself)));
-
-
-        artifacts.add(itself);
-        artifacts.forEach( t -> getLogger().info(" ------> " + t.toASCIIString()));
         ImageBuilder imageBuilder = new ImageBuilder(base);
-        TargetPlatformSpec input = imageBuilder.findSpec(artifacts);
-        TargetPlatformSpec result = imageBuilder.prepare(input,artifacts);
+
+        // spec is built by GestaltTask.
+        TargetPlatformSpec spec  = new ClasspathRepositoryStore(Okio.buffer(Okio.source(input)).readByteArray()).platform();
+        TargetPlatformSpec result = imageBuilder.prepare(spec);
         getLogger().info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result));
     }
 
