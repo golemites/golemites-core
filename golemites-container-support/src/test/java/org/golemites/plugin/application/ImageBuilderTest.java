@@ -36,9 +36,7 @@ class ImageBuilderTest {
                 dependency("foo2", p2.toUri())
         });
 
-        Path p3 = Files.write(inputs.resolve("DATA3"),"data3".getBytes(StandardCharsets.UTF_8));
-        Path p4 = Files.write(inputs.resolve("DATA4"),"data4".getBytes(StandardCharsets.UTF_8));
-        TargetPlatformSpec result = imageBuilder.prepare(spec,Arrays.asList(p3.toUri(),p4.toUri()));
+        TargetPlatformSpec result = imageBuilder.prepare(spec);
 
         Path root = fs.getPath("/");
 

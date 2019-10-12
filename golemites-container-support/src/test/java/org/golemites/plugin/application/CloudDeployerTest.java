@@ -46,7 +46,7 @@ class CloudDeployerTest {
                 dependency("foo2", p2.toUri())
         });
 
-        TargetPlatformSpec result = imageBuilder.prepare(spec, Arrays.asList());
+        TargetPlatformSpec result = imageBuilder.prepare(spec);
 
         GolemitesApplicationExtension config = new GolemitesApplicationExtension();
         config.setPushTo(PushTarget.FILE);

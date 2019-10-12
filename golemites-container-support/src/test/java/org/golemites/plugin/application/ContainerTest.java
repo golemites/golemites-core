@@ -37,12 +37,7 @@ public class ContainerTest {
         TargetPlatformSpec spec = imageBuilder.findSpec(Collections.singletonList(new File("./../golemites-example-baseline/build/libs/golemites-example-baseline-0.1.0-SNAPSHOT.jar").toURI()));
 
         TargetPlatformSpec result = imageBuilder.prepare(
-                spec,
-                Arrays.asList(
-                        new File("./../../febo-application/application-calculator/build/classes/java/main").toURI(),
-                        new File("./../../febo-application/application-web/build/classes/java/main").toURI(),
-                        new File("./../../febo-application/application-service/build/classes/java/main").toURI()
-                )
+                spec
         );
         System.out.println(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result));
 
