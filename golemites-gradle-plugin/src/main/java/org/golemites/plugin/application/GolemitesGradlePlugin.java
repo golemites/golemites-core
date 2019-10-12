@@ -1,15 +1,11 @@
 package org.golemites.plugin.application;
 
-import okio.Okio;
-import org.golemites.repository.ClasspathRepositoryStore;
+import org.golemites.api.GolemitesApplicationExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.file.FileCollection;
-import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.logging.LogLevel;
-import org.golemites.api.GolemitesApplicationExtension;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
