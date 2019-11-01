@@ -24,11 +24,9 @@ dependencies {
     compile project(':golemites-osgi-launcher')
     compile project(':golemites-core')
     compile project(':golemites-repository')
-    compile project(':golemites-autobundle')
 
     compile libraries.jib_core
     compile libraries.integrity
-    compile libraries.tinybundles
     compile libraries.okio
     compile libraries.asm_commons
     compile libraries.jackson_all

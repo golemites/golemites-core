@@ -20,8 +20,8 @@ repositories {
 
 dependencies {
     compile project(':golemites-api')
-    compile libraries.tinybundles
     compile libraries.felix
+    compile libraries.slf4j_api
     compile libraries.osgi_annotation
     compile libraries.okio
 

@@ -3,10 +3,8 @@ package org.golemites.plugin.application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okio.BufferedSink;
 import okio.Okio;
-import org.golemites.api.DelayedBuilder;
 import org.golemites.api.Dependency;
 import org.golemites.api.TargetPlatformSpec;
-import org.golemites.autobundle.AutoBundleSupport;
 import org.golemites.launcher.Launcher;
 import org.golemites.repository.ClasspathRepositoryStore;
 import org.slf4j.Logger;
@@ -18,8 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -102,24 +98,6 @@ public class ImageBuilder {
         try (OutputStream fos = Files.newOutputStream(here)) {
             mapper.writeValue(fos, targetPlatformSpec);
         }
-    }
-
-    private List<Dependency> calculateAutobundles(List<URI> projectConf) throws IOException, URISyntaxException {
-        List<URL> potentialAutobundles = new ArrayList<>();
-        for (URI art : projectConf) {
-            LOG.info("Found Artifact for autobundle: " + art.toASCIIString());
-            potentialAutobundles.add(art.toURL());
-        }
-
-        AutoBundleSupport autobundle = new AutoBundleSupport();
-        Set<DelayedBuilder<Dependency>> result = autobundle.discover(potentialAutobundles);
-        List<Dependency> deps = new ArrayList<>();
-        for (DelayedBuilder<Dependency> auto : result) {
-            Dependency bundle = auto.build();
-            LOG.info("Writing Autobundle to Fatjar: " + bundle);
-            deps.add(bundle);
-        }
-        return deps;
     }
 
     public TargetPlatformSpec findSpec(List<URI> c) throws IOException {

@@ -2,7 +2,6 @@ def junitPlatformVersion = '1.5.2'
 def junitJupiterVersion = '5.5.2'
 def log4jVersion = '2.9.0'
 def integrityVersion = '0.4.0-SNAPSHOT'
-def tinybundlesVersion = '3.0.1-SNAPSHOT'
 def guavaVersion = '20.0'
 def lombokVersion = '1.18.4'
 def osgiVersion = '7.0.0'
@@ -31,7 +30,6 @@ rootProject.ext {
             jupiter_api    : "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}",
             jupiter_engine : "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}",
             apiguardian    : "org.apiguardian:apiguardian-api:${apiguardianVersion}",
-            tinybundles    : "org.ops4j.pax.tinybundles:tinybundles:${tinybundlesVersion}",
             felix          : "org.apache.felix:org.apache.felix.framework:$felixVersion",
             slf4j_api      : "org.slf4j:slf4j-api:${slf4jVersion}",
             slf4j_simple   : "org.slf4j:slf4j-simple:${slf4jVersion}",
