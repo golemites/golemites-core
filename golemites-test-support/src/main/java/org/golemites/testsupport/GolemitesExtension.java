@@ -1,7 +1,7 @@
 package org.golemites.testsupport;
 
 import org.golemites.api.Boot;
-import org.golemites.api.Febo;
+import org.golemites.api.ModuleRuntime;
 import org.golemites.repository.ClasspathRepositoryStore;
 import org.gradle.tooling.GradleConnectionException;
 import org.gradle.tooling.GradleConnector;
@@ -31,7 +31,7 @@ import java.util.Optional;
 public class GolemitesExtension implements ParameterResolver, BeforeEachCallback, AfterEachCallback, BeforeAllCallback {
 
     private Map<String, Class<?>> services = new HashMap<>();
-    private Febo febo;
+    private ModuleRuntime moduleRuntime;
     private Logger LOG = LoggerFactory.getLogger(GolemitesExtension.class);
     private File blob;
 
@@ -91,7 +91,7 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
-        this.febo = Boot.febo()
+        this.moduleRuntime = Boot.findModuleRuntime()
                 .platform(new ClasspathRepositoryStore(new FileInputStream(blob)).platform());
 
         if (context.getTestMethod().isPresent()) {
@@ -102,19 +102,19 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
                 expose(name, type);
             }
         }
-        febo.start();
+        moduleRuntime.start();
     }
 
     private void expose(String name, Class<?> type) {
         services.put(name, type);
-        febo.exposePackage(type.getPackage().getName());
+        moduleRuntime.exposePackage(type.getPackage().getName());
         for (Method m : type.getMethods()) {
             if (m.getReturnType() != null && m.getReturnType().getPackage() != null) {
-                febo.exposePackage(m.getReturnType().getPackage().getName());
+                moduleRuntime.exposePackage(m.getReturnType().getPackage().getName());
             }
             for (Parameter p : m.getParameters()) {
                 if (p.getType() != null && p.getType().getPackage() != null) {
-                    febo.exposePackage(p.getType().getPackage().getName());
+                    moduleRuntime.exposePackage(p.getType().getPackage().getName());
                 }
             }
         }
@@ -122,8 +122,8 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
 
     @Override
     public void afterEach(ExtensionContext context) throws Exception {
-        if (febo != null) {
-            febo.stop();
+        if (moduleRuntime != null) {
+            moduleRuntime.stop();
         }
     }
 
@@ -137,7 +137,7 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         try {
-            Optional<Object> s = (Optional<Object>) febo.service(parameterContext.getParameter().getType());
+            Optional<Object> s = (Optional<Object>) moduleRuntime.service(parameterContext.getParameter().getType());
             if (s.isPresent()) {
                 return s.get();
             } else {

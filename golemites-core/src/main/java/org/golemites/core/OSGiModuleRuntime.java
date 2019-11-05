@@ -1,5 +1,10 @@
 package org.golemites.core;
 
+import org.golemites.api.DelayedBuilder;
+import org.golemites.api.Dependency;
+import org.golemites.api.Entrypoint;
+import org.golemites.api.ModuleRuntime;
+import org.golemites.api.TargetPlatformSpec;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -8,28 +13,17 @@ import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.golemites.api.DelayedBuilder;
-import org.golemites.api.Dependency;
-import org.golemites.api.Febo;
-import org.golemites.api.FeboEntrypoint;
-import org.golemites.api.TargetPlatformSpec;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,25 +31,19 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
-public class OSGiFebo implements Febo {
-    private final static Logger LOG = LoggerFactory.getLogger( OSGiFebo.class );
+public class OSGiModuleRuntime implements ModuleRuntime {
+    private final static Logger LOG = LoggerFactory.getLogger( OSGiModuleRuntime.class );
     private Map<String,Dependency> deps = new LinkedHashMap<>(  );
     private Framework systemBundle;
     private Set<String> packagesExposed = new HashSet<>();
 
-    public OSGiFebo() {
-        //this.blobstore = StoreFactory.defaultStore();
-    }
-
-    public static Febo febo() {
-        return new OSGiFebo();
+    public static ModuleRuntime create() {
+        return new OSGiModuleRuntime();
     }
 
     @Override
-    public Febo exposePackage(String p) {
+    public ModuleRuntime exposePackage(String p) {
         this.packagesExposed.add(p);
         return this;
     }
@@ -63,7 +51,7 @@ public class OSGiFebo implements Febo {
     @Override
     public boolean start() throws IOException {
         Instant t = Instant.now();
-        delete( new File("felix-cache") );
+        Helpers.delete( new File("felix-cache") );
         systemBundle = configureFramework();
 
         try {
@@ -84,17 +72,6 @@ public class OSGiFebo implements Febo {
             return success;
         } catch (BundleException | IOException e) {
             throw new RuntimeException("OSGI Framework did not boot..",e);
-        }
-    }
-
-    private void delete(File file) throws IOException {
-        if (file.exists() && file.isDirectory()) {
-            Path pathToBeDeleted = file.toPath();
-
-            Files.walk(pathToBeDeleted)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
         }
     }
 
@@ -129,7 +106,7 @@ public class OSGiFebo implements Febo {
     }
 
     @Override
-    public Febo platform(TargetPlatformSpec platform) {
+    public ModuleRuntime platform(TargetPlatformSpec platform) {
         require(platform.getDependencies());
         if (platform.getApplication() != null) {
             require(platform.getApplication());
@@ -154,21 +131,21 @@ public class OSGiFebo implements Febo {
     }
 
     @Override
-    public Febo require(DelayedBuilder<Dependency>... delayed)
+    public ModuleRuntime require(DelayedBuilder<Dependency>... delayed)
     {
         Arrays.asList(delayed).forEach( d -> require(d.build()));
         return this;
     }
 
     @Override
-    public Febo require(Collection<DelayedBuilder<Dependency>> delayed)
+    public ModuleRuntime require(Collection<DelayedBuilder<Dependency>> delayed)
     {
         delayed.forEach( d -> require(d.build()));
         return this;
     }
 
     @Override
-    public Febo require(Dependency... identifiers)
+    public ModuleRuntime require(Dependency... identifiers)
     {
         for (Dependency identifier : identifiers)
         {
@@ -230,7 +207,7 @@ public class OSGiFebo implements Febo {
     }
 
     private void callEntrypoint(String[] args) {
-        Optional<FeboEntrypoint> entry = entrypoint( FeboEntrypoint.class );
+        Optional<Entrypoint> entry = entrypoint( Entrypoint.class );
         if (entry.isPresent()) {
             LOG.info("Entrypoint is " + entry.getClass().getName());
             entry.get().execute(args, System.in, System.out, System.err);
@@ -245,30 +222,6 @@ public class OSGiFebo implements Febo {
     @Override
     public void stop() {
         kill();
-    }
-
-    private void scan(Bundle b) {
-        ZipInputStream zip = null;
-        try {
-            zip = new ZipInputStream( new URL(b.getLocation()).openStream());
-
-        for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
-            if (!entry.isDirectory() && entry.getName().startsWith("OSGI-INF/") && entry.getName().endsWith(".xml")) {
-                LOG.debug(" + " + entry.getName());
-
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(b.getResource(entry.getName()).openStream()))) {
-                    String line = null;
-                    while ((line = br.readLine()) != null) {
-                        if (LOG.isTraceEnabled()) {
-                            System.out.println(line);
-                        }
-                    }
-                }
-            }
-        }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 }

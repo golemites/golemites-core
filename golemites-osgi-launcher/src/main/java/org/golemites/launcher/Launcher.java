@@ -1,8 +1,8 @@
 package org.golemites.launcher;
 
 import org.golemites.api.Boot;
-import org.golemites.api.Febo;
-import org.golemites.api.FeboEntrypoint;
+import org.golemites.api.ModuleRuntime;
+import org.golemites.api.Entrypoint;
 import org.golemites.repository.EmbeddedStore;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -75,17 +75,17 @@ public class Launcher {
 
     private void bootOsgi() throws Exception {
         // this needs to have platform + application bundles in blob.
-        Febo febo = Boot.febo().platform(new EmbeddedStore().platform());
+        ModuleRuntime moduleRuntime = Boot.findModuleRuntime().platform(new EmbeddedStore().platform());
 
-        febo.start();
-        Optional<FeboEntrypoint> command = febo.service(FeboEntrypoint.class);
+        moduleRuntime.start();
+        Optional<Entrypoint> command = moduleRuntime.service(Entrypoint.class);
         if (command.isPresent()) {
             LOG.info("Found command, executing..");
             command.get().execute(this.command,System.in, System.out,System.err);
             // hard exit
             System.exit(0);
 
-            febo.stop();
+            moduleRuntime.stop();
         }else {
             LOG.info("Golemites is running in server mode.");
         }

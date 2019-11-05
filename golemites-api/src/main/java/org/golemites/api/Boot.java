@@ -6,12 +6,12 @@ import java.util.ServiceLoader;
  * TODO: Will be moved to its own bootstrapper.
  */
 public class Boot {
-    public static Febo febo() {
-        ServiceLoader<Febo> thing = ServiceLoader.load(Febo.class);
+    public static ModuleRuntime findModuleRuntime() {
+        ServiceLoader<ModuleRuntime> thing = ServiceLoader.load(ModuleRuntime.class);
 
-        for (Febo febo : thing) {
-            return febo;
+        for (ModuleRuntime moduleRuntime : thing) {
+            return moduleRuntime;
         }
-        throw new IllegalStateException("No Febo Runtime found in classpath.");
+        throw new IllegalStateException("No ModuleRuntime found in classpath.");
     }
 }
