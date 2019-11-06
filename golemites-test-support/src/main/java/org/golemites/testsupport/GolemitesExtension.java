@@ -91,7 +91,7 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
-        this.moduleRuntime = Boot.findModuleRuntime()
+        this.moduleRuntime = Boot.findModuleRuntime(this.getClass().getClassLoader())
                 .platform(new ClasspathRepositoryStore(new FileInputStream(blob)).platform());
 
         if (context.getTestMethod().isPresent()) {

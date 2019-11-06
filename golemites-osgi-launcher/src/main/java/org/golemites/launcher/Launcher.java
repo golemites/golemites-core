@@ -75,7 +75,7 @@ public class Launcher {
 
     private void bootOsgi() throws Exception {
         // this needs to have platform + application bundles in blob.
-        ModuleRuntime moduleRuntime = Boot.findModuleRuntime().platform(new EmbeddedStore().platform());
+        ModuleRuntime moduleRuntime = Boot.findModuleRuntime(this.getClass().getClassLoader()).platform(new EmbeddedStore().platform());
 
         moduleRuntime.start();
         Optional<Entrypoint> command = moduleRuntime.service(Entrypoint.class);
