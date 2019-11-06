@@ -32,6 +32,9 @@ dependencies {
     //runtimeOnly "ch.qos.logback:logback-classic:1.1.7"
 }
 
+// make sure all other jars are built:
+jar.dependsOn(':golemites-repository:jar')
+
 jar {
     manifest {
         attributes "Main-Class": "org.golemites.launcher.Launcher"
