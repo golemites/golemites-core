@@ -21,7 +21,7 @@ repositories {
 dependencies {
     implementation project(':golemites-core')
     implementation project(':golemites-repository')
-    api "org.gradle:gradle-tooling-api:5.6.4"
+    implementation "org.gradle:gradle-tooling-api:${gradle.gradleVersion}"
 
     api libraries.jupiter_api
     testCompileOnly libraries.apiguardian
