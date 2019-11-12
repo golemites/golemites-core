@@ -7,8 +7,8 @@ import org.golemites.api.Metadata;
 import org.golemites.api.TargetPlatformSpec;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.PublishArtifact;
 import org.gradle.api.artifacts.ResolvedArtifact;
-import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.rebaze.integrity.tree.api.TreeSession;
@@ -61,6 +61,26 @@ public class MakeGestaltTask extends DefaultTask {
                     ));
             platformDeps.add(dependency);
         }
+        // if the current project is a valid bundle, then we need to add this, too:
+        // Get Hold of Jar:
+        Configuration runtime = getProject().getConfigurations().getByName("runtimeClasspath");
+
+        for (PublishArtifact artifact : runtime.getAllArtifacts()) {
+            getLogger().warn(" >> (from runtime) " + artifact.getFile().getName());
+            Dependency dependency = Dependency.dependency(
+                    session.createStreamTreeBuilder().add(artifact.getFile()).seal().value().hash(),
+                    artifact.getFile().toURI(),
+                    Metadata.metadata(
+                            getProject().getGroup().toString(),
+                            artifact.getName(),
+                            getProject().getVersion().toString(),
+                            artifact.getClassifier(),
+                            artifact.getType()
+                    ));
+            platformDeps.add(dependency);
+        }
+
+
         platform.setDependencies(platformDeps.toArray(new Dependency[0]));
         DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
         platform.setBuildTimeUTC(dtf.format(Instant.now()));
