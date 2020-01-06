@@ -104,7 +104,7 @@ class GenerateStaticApiTask extends DefaultTask {
             deps.add(rd)
         }
         platform.setDependencies(deps.toArray(new Dependency[deps.size()]))
-        mapper.writeValue(new File(generatedResourcesDir,"febo-blobs.json"),platform)
+        mapper.writeValue(new File(generatedResourcesDir,BLOB_FILENAME),platform)
 
 
         // baseline api

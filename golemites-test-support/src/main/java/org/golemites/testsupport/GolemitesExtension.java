@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.golemites.repository.ClasspathRepositoryStore.BLOB_FILENAME;
+
 public class GolemitesExtension implements ParameterResolver, BeforeEachCallback, AfterEachCallback, BeforeAllCallback {
 
     private Map<String, Class<?>> services = new HashMap<>();
@@ -71,7 +73,7 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
             connection.close();
         }
         // Here we should find the blob:
-        blob = new File(gestaltTask.getProject().getBuildDirectory(), "generated/resources/febo-blobs.json");
+        blob = new File(gestaltTask.getProject().getBuildDirectory(), "generated/resources/" + BLOB_FILENAME);
 
         LOG.warn("Done: " + blob);
 

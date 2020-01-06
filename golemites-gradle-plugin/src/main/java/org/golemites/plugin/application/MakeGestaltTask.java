@@ -48,7 +48,7 @@ public class MakeGestaltTask extends DefaultTask {
 
         Configuration repoConfig = getProject().getConfigurations().getByName("repository");
         for (ResolvedArtifact deps : repoConfig.getResolvedConfiguration().getResolvedArtifacts()) {
-            getLogger().warn(" >> " + deps.getFile().getName());
+            getLogger().warn(" >> (from repository)" + deps.getFile().getName());
             Dependency dependency = Dependency.dependency(
                     session.createStreamTreeBuilder().add(deps.getFile()).seal().value().hash(),
                     deps.getFile().toURI(),
@@ -65,17 +65,17 @@ public class MakeGestaltTask extends DefaultTask {
         // Get Hold of Jar:
         Configuration runtime = getProject().getConfigurations().getByName("runtimeClasspath");
 
-        for (PublishArtifact artifact : runtime.getAllArtifacts()) {
-            getLogger().warn(" >> (from runtime) " + artifact.getFile().getName());
+        for (PublishArtifact deps : runtime.getAllArtifacts()) {
+            getLogger().warn(" >> (from repository) " + deps.getFile().getName());
             Dependency dependency = Dependency.dependency(
-                    session.createStreamTreeBuilder().add(artifact.getFile()).seal().value().hash(),
-                    artifact.getFile().toURI(),
+                    session.createStreamTreeBuilder().add(deps.getFile()).seal().value().hash(),
+                    deps.getFile().toURI(),
                     Metadata.metadata(
                             getProject().getGroup().toString(),
-                            artifact.getName(),
+                            deps.getName(),
                             getProject().getVersion().toString(),
-                            artifact.getClassifier(),
-                            artifact.getType()
+                            deps.getClassifier(),
+                            deps.getType()
                     ));
             platformDeps.add(dependency);
         }

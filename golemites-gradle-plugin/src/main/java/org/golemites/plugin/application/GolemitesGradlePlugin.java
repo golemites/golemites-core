@@ -16,27 +16,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
+import static org.golemites.repository.ClasspathRepositoryStore.BLOB_FILENAME;
+
 public class GolemitesGradlePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
-        Configuration config = project.getConfigurations().maybeCreate("repository");
-        config.setTransitive(false);
+        makeConfigurationNotTransitive(project);
 
         project.getLogger().log(LogLevel.INFO,"Creating Golemites Gestalt");
-        GolemitesApplicationExtension ext = project.getExtensions().create("golemites", GolemitesApplicationExtension.class);
-        project.getLogger().info("Created extension " + ext + " with " + ext.getRepository());
+        project.getExtensions().create("golemites", GolemitesApplicationExtension.class);
 
         File generatedResourcesDir = new File(project.getBuildDir(), "generated/resources");
         generatedResourcesDir.mkdirs();
-        File spec = new File(generatedResourcesDir, "febo-blobs.json");
-        Task makeGestalt = project.getTasks().create( "gestalt", MakeGestaltTask.class, spec);
-        Path golemitesOutput;
-        try {
-             golemitesOutput = Files.createDirectories(project.getBuildDir().toPath().resolve("golemites-build"));
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot create output folder..");
-        }
+        File spec = new File(generatedResourcesDir, BLOB_FILENAME);
+        Path golemitesOutput = prepareOutput(project);
 
+        Task makeGestalt = project.getTasks().create( "gestalt", MakeGestaltTask.class, spec);
         Task installTask = project.getTasks().create( "install", InstallTask.class,spec,golemitesOutput.toFile());
         Task deployTask = project.getTasks().create( "deploy", DeployTask.class);
 
@@ -52,7 +47,7 @@ public class GolemitesGradlePlugin implements Plugin<Project> {
 
         //project.getTasks().getByName("build");
         project.getRootProject().getAllprojects().forEach(p -> {
-            p.getTasks().getByName("build").dependsOn(makeGestalt);
+            p.getTasks().getByName("assemble").dependsOn(makeGestalt);
             if (p.getTasks().findByName("jar") != null) {
                 if (!p.equals(project)) {
                     project.getLogger().info(makeGestalt.getName() + " depends on " + p.getName());
@@ -66,5 +61,20 @@ public class GolemitesGradlePlugin implements Plugin<Project> {
             }
         });
         //makeGestalt.dependsOn(project.getTasks().getByName("jar"));
+    }
+
+    private void makeConfigurationNotTransitive(Project project) {
+        Configuration config = project.getConfigurations().maybeCreate("repository");
+        config.setTransitive(false);
+    }
+
+    private Path prepareOutput(Project project) {
+        Path golemitesOutput;
+        try {
+            golemitesOutput = Files.createDirectories(project.getBuildDir().toPath().resolve("golemites-build"));
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot create output folder..");
+        }
+        return golemitesOutput;
     }
 }
