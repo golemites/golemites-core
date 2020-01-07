@@ -2,7 +2,7 @@ plugins {
     id "idea"
     id "groovy"
     id "java-gradle-plugin"
-    id "io.freefair.lombok" version "4.1.4"
+    id "io.freefair.lombok" version "4.1.6"
 }
 
 /**
