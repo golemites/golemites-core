@@ -29,7 +29,7 @@ public class InstallTask extends DefaultTask {
         this.outputFolder = outputFolder;
     }
 
-    @Input
+    @InputFile
     public File getInput() {
         return input;
     }
