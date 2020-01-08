@@ -23,6 +23,8 @@ dependencies {
     compile project(':golemites-api')
     compile project(':golemites-core')
     compile project(':golemites-repository')
+    // compile 'org.eclipse.platform:org.eclipse.osgi:3.15.100'
+    // compile 'org.eclipse.platform:org.eclipse.osgi.util:3.5.300'
     compile libraries.felix
     compile libraries.slf4j_api
     compile libraries.slf4j_simple
