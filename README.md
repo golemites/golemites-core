@@ -5,7 +5,7 @@
 
 # Project Golemites
 
-This project is work in progress. First public demos are scheduled for late 2019.
+This project is work in progress. First public demos are scheduled for Q1 2020.
 
 Contact Email dev@rebaze.com or twitter @tonit & @rebazeio.
 
