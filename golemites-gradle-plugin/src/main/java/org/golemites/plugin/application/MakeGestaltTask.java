@@ -16,11 +16,14 @@ import org.rebaze.integrity.tree.util.DefaultTreeSessionFactory;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 public class MakeGestaltTask extends DefaultTask {
 
@@ -49,6 +52,7 @@ public class MakeGestaltTask extends DefaultTask {
         Configuration repoConfig = getProject().getConfigurations().getByName("repository");
         for (ResolvedArtifact deps : repoConfig.getResolvedConfiguration().getResolvedArtifacts()) {
             getLogger().warn(" >> (from repository)" + deps.getFile().getName());
+
             Dependency dependency = Dependency.dependency(
                     session.createStreamTreeBuilder().add(deps.getFile()).seal().value().hash(),
                     deps.getFile().toURI(),
@@ -57,7 +61,8 @@ public class MakeGestaltTask extends DefaultTask {
                             deps.getName(),
                             deps.getModuleVersion().getId().getVersion(),
                             deps.getClassifier(),
-                            deps.getType()
+                            deps.getType(),
+                            readBsn(deps.getFile())
                     ));
             platformDeps.add(dependency);
         }
@@ -75,11 +80,11 @@ public class MakeGestaltTask extends DefaultTask {
                             deps.getName(),
                             getProject().getVersion().toString(),
                             deps.getClassifier(),
-                            deps.getType()
+                            deps.getType(),
+                            readBsn(deps.getFile())
                     ));
             platformDeps.add(dependency);
         }
-
 
         platform.setDependencies(platformDeps.toArray(new Dependency[0]));
         DateTimeFormatter dtf = DateTimeFormatter.ISO_INSTANT;
@@ -87,5 +92,12 @@ public class MakeGestaltTask extends DefaultTask {
         getLogger().info(new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(platform));
         mapper.writeValue(getOutput(),platform);
         getLogger().info("Output: " + getOutput().getAbsolutePath());
+    }
+
+    private String readBsn(File f) throws IOException {
+        try (JarInputStream jin = new JarInputStream(new FileInputStream(f))) {
+            Manifest manifest = jin.getManifest();
+            return manifest.getMainAttributes().getValue("Bundle-SymbolicName");
+        }
     }
 }
