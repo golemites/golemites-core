@@ -3,6 +3,7 @@ package org.golemites.launcher;
 import org.golemites.api.Boot;
 import org.golemites.api.ModuleRuntime;
 import org.golemites.api.Entrypoint;
+import org.golemites.api.RepositoryStore;
 import org.golemites.repository.EmbeddedStore;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -75,7 +76,8 @@ public class Launcher {
 
     private void bootOsgi() throws Exception {
         // this needs to have platform + application bundles in blob.
-        ModuleRuntime moduleRuntime = Boot.findModuleRuntime(this.getClass().getClassLoader()).platform(new EmbeddedStore().platform());
+        RepositoryStore store = new EmbeddedStore(workdir.toPath());
+        ModuleRuntime moduleRuntime = Boot.findModuleRuntime(this.getClass().getClassLoader()).platform(store.platform());
 
         moduleRuntime.start();
         Optional<Entrypoint> command = moduleRuntime.service(Entrypoint.class);
@@ -200,6 +202,6 @@ public class Launcher {
                 "                                                       ";
 
         CliUtil.printInfo("GOLEMITES controller is starting..");
-        System.out.println(logo4);
+        // System.out.println(logo4);
     }
 }

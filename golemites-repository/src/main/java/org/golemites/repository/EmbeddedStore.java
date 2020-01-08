@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.golemites.repository.ClasspathRepositoryStore.BLOB_FILENAME;
 
@@ -23,16 +25,22 @@ public class EmbeddedStore implements RepositoryStore
 
     public EmbeddedStore()
     {
-        this("/" + BLOB_FILENAME);
+        this( new File(".").toPath());
     }
 
-    public EmbeddedStore(String path )
+    public EmbeddedStore(Path base)
     {
+        this( base, BLOB_FILENAME);
+    }
+
+    private EmbeddedStore(Path base, String filename)
+    {
+        String path = "/" + filename;
         try
         {
-            File local = new File("./CONFIGURATION" + path);
-            if (local.exists()) {
-                index = mapper.readValue(local, TargetPlatformSpec.class);
+            Path descriptor = base.resolve("CONFIGURATION").resolve(filename);
+            if (descriptor.toFile().exists()) {
+                index = mapper.readValue(descriptor.toFile(), TargetPlatformSpec.class);
             }else {
                 if (ClasspathRepositoryStore.class.getResource(path) != null) {
                     index = mapper.readValue(ClasspathRepositoryStore.class.getResourceAsStream(path), TargetPlatformSpec.class);
@@ -43,9 +51,10 @@ public class EmbeddedStore implements RepositoryStore
             }
             // rewrite embedded resources
             for (Dependency d : index.getDependencies()) {
-                URI old = d.getLocation();
-                URI newLocation = old; // parseEmbedded(old.toASCIIString());
-                LOG.debug("Rewrite location from " + old.toASCIIString() + " to " + newLocation.toASCIIString());
+                URI givenLocation = d.getLocation();
+                // URI newLocation = old; // parseEmbedded(old.toASCIIString());
+                URI newLocation = prefixWithBase(base,givenLocation); // parseEmbedded(old.toASCIIString());
+                LOG.debug("Rewrite location from " + givenLocation.toASCIIString() + " to " + newLocation.toASCIIString());
                 d.setLocation(newLocation);
             }
         }
@@ -53,6 +62,11 @@ public class EmbeddedStore implements RepositoryStore
         {
             throw new RuntimeException("Problem loading store from " + path,e);
         }
+    }
+
+    static URI prefixWithBase(Path base, URI givenLocation) {
+        Path given = Paths.get(givenLocation);
+        return base.resolve(Paths.get("/").relativize(given)).normalize().toUri();
     }
 
     private static URI parseEmbedded(String location )

@@ -66,7 +66,7 @@ public class MakeGestaltTask extends DefaultTask {
         Configuration runtime = getProject().getConfigurations().getByName("runtimeClasspath");
 
         for (PublishArtifact deps : runtime.getAllArtifacts()) {
-            getLogger().warn(" >> (from repository) " + deps.getFile().getName());
+            getLogger().warn(" >> (from classpath) " + deps.getFile().getName());
             Dependency dependency = Dependency.dependency(
                     session.createStreamTreeBuilder().add(deps.getFile()).seal().value().hash(),
                     deps.getFile().toURI(),

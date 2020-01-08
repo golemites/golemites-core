@@ -21,23 +21,24 @@ import static org.golemites.repository.ClasspathRepositoryStore.BLOB_FILENAME;
 public class GolemitesGradlePlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
-        makeConfigurationNotTransitive(project);
-
         project.getLogger().log(LogLevel.INFO,"Creating Golemites Gestalt");
+        makeConfigurationNotTransitive(project);
         project.getExtensions().create("golemites", GolemitesApplicationExtension.class);
-
         File generatedResourcesDir = new File(project.getBuildDir(), "generated/resources");
         generatedResourcesDir.mkdirs();
         File spec = new File(generatedResourcesDir, BLOB_FILENAME);
+        project.getLogger().info("Blob will be written to " + spec.getAbsolutePath());
         Path golemitesOutput = prepareOutput(project);
 
         Task makeGestalt = project.getTasks().create( "gestalt", MakeGestaltTask.class, spec);
         Task installTask = project.getTasks().create( "install", InstallTask.class,spec,golemitesOutput.toFile());
-        Task deployTask = project.getTasks().create( "deploy", DeployTask.class);
+        installTask.dependsOn(makeGestalt);
+
+        // Create image, deploy to registry, create kubernetes resources.
+        // Task deployTask = project.getTasks().create( "deploy", DeployTask.class);
+        // deployTask.dependsOn(installTask);
 
         // make compileJava depend on generating sourcecode
-        deployTask.dependsOn(installTask);
-
         SourceSetContainer sourceSets = project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets();
         SourceSet versionSet = sourceSets.getByName("main");
         Set<File> directories = versionSet.getResources().getSrcDirs();
@@ -49,15 +50,17 @@ public class GolemitesGradlePlugin implements Plugin<Project> {
         project.getRootProject().getAllprojects().forEach(p -> {
             p.getTasks().getByName("assemble").dependsOn(makeGestalt);
             if (p.getTasks().findByName("jar") != null) {
-                if (!p.equals(project)) {
+//                if (!p.equals(project)) {
                     project.getLogger().info(makeGestalt.getName() + " depends on " + p.getName());
                     makeGestalt.dependsOn(p.getTasks().getByName("jar"));
-                }else {
-                    project.getLogger().info("!! " + makeGestalt.getName() + " runs before jar on " + p.getName());
-                    p.getTasks().getByName("jar").dependsOn(makeGestalt);
-                    makeGestalt.finalizedBy(p.getTasks().getByName("jar"));
-                    //p.getTasks().getByName("build").dependsOn(makeGestalt);
-                }
+// This only makes sense when we want to include the gestalt artifact into the jar which is not our current intention anymore.
+// Instead, we will build a new fatjar right in the gestalt and attach all artifacts to be published.
+//                }else {
+//                    project.getLogger().info("!! " + makeGestalt.getName() + " runs before jar on " + p.getName());
+//                    p.getTasks().getByName("jar").dependsOn(makeGestalt);
+//                    makeGestalt.finalizedBy(p.getTasks().getByName("jar"));
+//                    //p.getTasks().getByName("build").dependsOn(makeGestalt);
+//                }
             }
         });
         //makeGestalt.dependsOn(project.getTasks().getByName("jar"));

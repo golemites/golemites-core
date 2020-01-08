@@ -27,3 +27,7 @@ dependencies {
     testRuntime libraries.jupiter_engine
     testCompileOnly libraries.apiguardian
 }
+
+test {
+    useJUnitPlatform()
+}

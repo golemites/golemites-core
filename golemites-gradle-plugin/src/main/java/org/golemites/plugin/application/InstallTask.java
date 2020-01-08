@@ -8,6 +8,7 @@ import org.golemites.repository.ClasspathRepositoryStore;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
@@ -15,7 +16,6 @@ import org.gradle.api.tasks.TaskAction;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class InstallTask extends DefaultTask {
@@ -29,7 +29,7 @@ public class InstallTask extends DefaultTask {
         this.outputFolder = outputFolder;
     }
 
-    @InputFile
+    @Input
     public File getInput() {
         return input;
     }
