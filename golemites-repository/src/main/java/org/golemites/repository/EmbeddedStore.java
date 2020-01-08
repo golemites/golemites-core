@@ -1,17 +1,18 @@
 package org.golemites.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.golemites.api.Dependency;
 import org.golemites.api.RepositoryStore;
 import org.golemites.api.TargetPlatformSpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -49,13 +50,28 @@ public class EmbeddedStore implements RepositoryStore
                 }
 
             }
-            // rewrite embedded resources
+            // rewrite dependency actual location
             for (Dependency d : index.getDependencies()) {
                 URI givenLocation = d.getLocation();
-                // URI newLocation = old; // parseEmbedded(old.toASCIIString());
-                URI newLocation = prefixWithBase(base,givenLocation); // parseEmbedded(old.toASCIIString());
-                LOG.debug("Rewrite location from " + givenLocation.toASCIIString() + " to " + newLocation.toASCIIString());
-                d.setLocation(newLocation);
+                URI externalLocation = prefixWithBase(base,givenLocation);
+                URI embeddedLocation = parseEmbedded(d.getLocation());
+                // Now which wins? Actually it does not really matter when using hashes as the final classifier.
+                // Therefor we just try all in a defined order
+                if (checkLocationHasContent("given",givenLocation)) {
+                    // unlikely.
+                    LOG.debug("Location exists as is: " + givenLocation.toASCIIString());
+                    d.setLocation(externalLocation);
+                }else if (checkLocationHasContent("embeddedLocation",embeddedLocation)) {
+                    // in embedded standalone runner case.
+                    LOG.debug("Rewrite location from " + givenLocation.toASCIIString() + " to " + embeddedLocation.toASCIIString());
+                    d.setLocation(embeddedLocation);
+                }else if (checkLocationHasContent("externalLocation",externalLocation)) {
+                    // exploded case. Either using containers or local debugging.
+                    LOG.debug("Rewrite location from " + givenLocation.toASCIIString() + " to " + externalLocation.toASCIIString());
+                    d.setLocation(externalLocation);
+                }else {
+                    throw new RuntimeException("Problem loading dependency " + d);
+                }
             }
         }
         catch ( IOException e )
@@ -64,17 +80,29 @@ public class EmbeddedStore implements RepositoryStore
         }
     }
 
-    static URI prefixWithBase(Path base, URI givenLocation) {
+    private boolean checkLocationHasContent(String name, URI uri) {
+        try {
+            URL url = uri.toURL();
+            URLConnection is = url.openConnection();
+            is.connect();
+        }catch(Exception e) {
+            LOG.info(" - Connecting to " + uri.toASCIIString() + " as " + name + " failed with exception: " + e.getMessage());
+            return false;
+        }
+        LOG.info(" + Connecting to " + uri.toASCIIString() + " as " + name + " succeeded.");
+        return true;
+    }
+
+    public static URI prefixWithBase(Path base, URI givenLocation) {
         Path given = Paths.get(givenLocation);
         return base.resolve(Paths.get("/").relativize(given)).normalize().toUri();
     }
-
-    private static URI parseEmbedded(String location )
+    private static URI parseEmbedded(URI location )
     {
         try
         {
             URL parent = Dependency.class.getProtectionDomain().getCodeSource().getLocation();
-            return new URI("jar:" + parent.toExternalForm() + "!/" + location);
+            return new URI("jar:" + parent.toExternalForm() + "!/" + location.getPath());
         }
         catch ( URISyntaxException e )
         {

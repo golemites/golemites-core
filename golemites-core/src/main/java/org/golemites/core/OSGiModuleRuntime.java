@@ -15,11 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -75,20 +72,21 @@ public class OSGiModuleRuntime implements ModuleRuntime {
         }
     }
 
-    private InputStream open(Dependency dependency) throws FileNotFoundException {
-        URI location = dependency.getLocation();
-        File local = new File(location);
-        if (!local.exists()) {
-            File relative = new File(".",local.getAbsolutePath());
-            if (relative.exists()) {
-                local = relative;
-            }else {
-                throw new RuntimeException("Cannot load dependency from spec: " + dependency);
-            }
-        }
-        //File local = new File(".",dependency.getLocation().toASCIIString()).getAbsoluteFile();
-        LOG.debug("Trying to install " + local);
-        return new FileInputStream(local);
+    private InputStream open(Dependency dependency) throws IOException {
+        return dependency.getLocation().toURL().openStream();
+//        URI location = dependency.getLocation();
+//        File local = new File(location);
+//        if (!local.exists()) {
+//            File relative = new File(".",local.getAbsolutePath());
+//            if (relative.exists()) {
+//                local = relative;
+//            }else {
+//                throw new RuntimeException("Cannot load dependency from spec: " + dependency);
+//            }
+//        }
+//        //File local = new File(".",dependency.getLocation().toASCIIString()).getAbsoluteFile();
+//        LOG.debug("Trying to install " + local);
+//        return new FileInputStream(local);
     }
 
     @SuppressWarnings({"unchecked","rawtypes"})

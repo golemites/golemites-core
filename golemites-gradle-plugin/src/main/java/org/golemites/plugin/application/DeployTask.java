@@ -6,6 +6,7 @@ import com.google.cloud.tools.jib.api.RegistryException;
 import io.kubernetes.client.ApiException;
 import org.golemites.api.GolemitesApplicationExtension;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.tasks.TaskAction;
@@ -22,12 +23,17 @@ public class DeployTask extends DefaultTask {
     public void exec() throws IOException, ApiException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         GolemitesApplicationExtension extension = getProject().getExtensions().getByType(GolemitesApplicationExtension.class);
         Path base = getProject().getBuildDir().toPath().resolve("golemites-build");
-        Configuration buildscriptConf = getProject().getBuildscript().getConfigurations().getByName("classpath");
-        Optional<ResolvedArtifact> launcher = buildscriptConf.getResolvedConfiguration().getResolvedArtifacts().stream().filter(art -> "golemites-osgi-launcher".equals(art.getName())).findAny();
-        if (!launcher.isPresent()) throw new RuntimeException("Launcher artifact is not present in dependency set.");
+        Optional<ResolvedArtifact> launcher = locateLauncher(getProject());
 
         CloudDeployer deployer = new CloudDeployer(launcher.get().getFile().toPath(),base,extension);
         String id = deployer.createImage(Paths.get("/"));
         deployer.deployApplication("@sha256:" + id);
+    }
+
+    static Optional<ResolvedArtifact> locateLauncher(Project project) {
+        Configuration buildscriptConf = project.getBuildscript().getConfigurations().getByName("classpath");
+        Optional<ResolvedArtifact> launcher = buildscriptConf.getResolvedConfiguration().getResolvedArtifacts().stream().filter(art -> "golemites-osgi-launcher".equals(art.getName())).findAny();
+        if (!launcher.isPresent()) throw new RuntimeException("Launcher artifact is not present in dependency set.");
+        return launcher;
     }
 }
