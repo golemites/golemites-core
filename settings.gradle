@@ -8,4 +8,3 @@ include "golemites-gradle-plugin"
 // include "golemites-baseline-gradle-plugin"
 include "golemites-test-support"
 include "golemites-container-support"
-enableFeaturePreview("GRADLE_METADATA")
