@@ -86,10 +86,10 @@ public class EmbeddedStore implements RepositoryStore
             URLConnection is = url.openConnection();
             is.connect();
         }catch(Exception e) {
-            LOG.info(" - Connecting to " + uri.toASCIIString() + " as " + name + " failed with exception: " + e.getMessage());
+            LOG.debug(" - Connecting to " + uri.toASCIIString() + " as " + name + " failed with exception: " + e.getMessage());
             return false;
         }
-        LOG.info(" + Connecting to " + uri.toASCIIString() + " as " + name + " succeeded.");
+        LOG.debug(" + Connecting to " + uri.toASCIIString() + " as " + name + " succeeded.");
         return true;
     }
 
