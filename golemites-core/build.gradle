@@ -1,7 +1,6 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    //id "io.freefair.lombok" version "3.8.0"
 }
 
 compileJava {
@@ -19,15 +18,15 @@ repositories {
 }
 
 dependencies {
-    compile project(':golemites-api')
-    compile libraries.felix
-    compile libraries.slf4j_api
-    compile libraries.osgi_annotation
-    compile libraries.okio
+    api project(':golemites-api')
+    implementation libraries.felix
+    api libraries.slf4j_api
+    api libraries.osgi_annotation
+    implementation libraries.okio
 
-    testCompile libraries.assertj
-    testCompile libraries.jupiter_api
-    testRuntime libraries.jupiter_engine
+    testCompileOnly libraries.assertj
+    testCompileOnly libraries.jupiter_api
+    testRuntimeOnly libraries.jupiter_engine
     testCompileOnly libraries.apiguardian
     testRuntimeOnly libraries.log4j_core
 }

@@ -1,7 +1,6 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    //id "io.freefair.lombok" version "3.8.0"
 }
 
 compileJava {
@@ -19,23 +18,23 @@ repositories {
 }
 
 dependencies {
-    compile libraries.slf4j_api
-    compile project(':golemites-api')
-    compile project(':golemites-osgi-launcher')
-    compile project(':golemites-core')
-    compile project(':golemites-repository')
+    api libraries.slf4j_api
+    implementation project(':golemites-api')
+    implementation project(':golemites-osgi-launcher')
+    implementation project(':golemites-core')
+    implementation project(':golemites-repository')
 
-    compile libraries.jib_core
-    compile libraries.integrity
-    compile libraries.okio
-    compile libraries.asm_commons
-    compile libraries.jackson_all
-    compile libraries.kubernetes_java
+    implementation libraries.jib_core
+    implementation libraries.integrity
+    implementation libraries.okio
+    implementation libraries.asm_commons
+    implementation libraries.jackson_all
+    implementation libraries.kubernetes_java
 
-    testCompile libraries.assertj
-    testCompile libraries.jimfs
-    testCompile libraries.jupiter_api
-    testRuntime libraries.jupiter_engine
+    testImplementation libraries.assertj
+    testImplementation libraries.jimfs
+    testImplementation libraries.jupiter_api
+    testRuntimeOnly libraries.jupiter_engine
     testCompileOnly libraries.apiguardian
     testRuntimeOnly libraries.log4j_core
 }
