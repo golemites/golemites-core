@@ -22,9 +22,11 @@ repositories {
 }
 
 dependencies {
-    compile project(':golemites-api')
-    compile project(':golemites-container-support')
-    //compile libraries.javapoet
+    implementation project(':golemites-api')
+    implementation project(':golemites-repository')
+    implementation project(':golemites-container-support')
+    implementation libraries.jackson_all
+    implementation libraries.integrity
 
     testImplementation libraries.jupiter_api
     testRuntimeOnly libraries.jupiter_engine

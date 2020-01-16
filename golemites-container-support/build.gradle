@@ -24,12 +24,12 @@ dependencies {
     implementation project(':golemites-core')
     implementation project(':golemites-repository')
 
-    implementation libraries.jib_core
-    implementation libraries.integrity
-    implementation libraries.okio
-    implementation libraries.asm_commons
-    implementation libraries.jackson_all
-    implementation libraries.kubernetes_java
+    api libraries.jib_core
+    api libraries.integrity
+    api libraries.okio
+    api libraries.asm_commons
+    api libraries.jackson_all
+    api libraries.kubernetes_java
 
     testImplementation libraries.assertj
     testImplementation libraries.jimfs
