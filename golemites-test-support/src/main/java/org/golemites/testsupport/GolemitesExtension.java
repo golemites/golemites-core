@@ -2,6 +2,7 @@ package org.golemites.testsupport;
 
 import org.golemites.api.Boot;
 import org.golemites.api.ModuleRuntime;
+import org.golemites.api.TargetPlatformSpec;
 import org.golemites.repository.ClasspathRepositoryStore;
 import org.gradle.tooling.GradleConnectionException;
 import org.gradle.tooling.GradleConnector;
@@ -21,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -34,11 +37,10 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
 
     private Map<String, Class<?>> services = new HashMap<>();
     private ModuleRuntime moduleRuntime;
-    private Logger LOG = LoggerFactory.getLogger(GolemitesExtension.class);
-    private File blob;
+    private static Logger LOG = LoggerFactory.getLogger(GolemitesExtension.class);
+    private TargetPlatformSpec blob;
 
-    @Override
-    public void beforeAll(ExtensionContext context) throws Exception {
+    protected static TargetPlatformSpec createAndGetPlatform() throws IOException {
         // make sure project "plan" is available:
         // find out if we are currently running in a gradle build and infer resolution instead of this.
 
@@ -73,13 +75,17 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
             connection.close();
         }
         // Here we should find the blob:
-        blob = new File(gestaltTask.getProject().getBuildDirectory(), "generated/resources/" + BLOB_FILENAME);
-
-        LOG.warn("Done: " + blob);
-
+        File f = new File(gestaltTask.getProject().getBuildDirectory(), "generated/resources/" + BLOB_FILENAME);
+        return new ClasspathRepositoryStore(new FileInputStream(f)).platform();
     }
 
-    private GradleTask findGestalt(GradleProject p) {
+    @Override
+    public void beforeAll(ExtensionContext context) throws Exception {
+        blob = createAndGetPlatform();
+        LOG.warn("Done: " + blob);
+    }
+
+    private static GradleTask findGestalt(GradleProject p) {
         for (GradleTask task : p.getTasks()) {
             if ("gestalt".equals(task.getName())) {
                 return task;
@@ -94,7 +100,7 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
         this.moduleRuntime = Boot.findModuleRuntime(this.getClass().getClassLoader())
-                .platform(new ClasspathRepositoryStore(new FileInputStream(blob)).platform());
+                .platform(createAndGetPlatform());
 
         if (context.getTestMethod().isPresent()) {
             Method m = context.getTestMethod().get();
@@ -106,6 +112,7 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
         }
         moduleRuntime.start();
     }
+
 
     private void expose(String name, Class<?> type) {
         services.put(name, type);
@@ -149,5 +156,6 @@ public class GolemitesExtension implements ParameterResolver, BeforeEachCallback
             throw new ParameterResolutionException("Could not aquire service of type " + parameterContext.getParameter().getType().getName());
         }
     }
+
 
 }
