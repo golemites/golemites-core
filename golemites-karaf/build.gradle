@@ -1,0 +1,62 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id "io.freefair.lombok" version "4.1.6"
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.compilerArgs += '-parameters'
+}
+
+compileTestJava {
+		options.compilerArgs += '-parameters'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations.compile.transitive = false
+
+dependencies {
+    compile project(':golemites-api')
+    compile project(':golemites-core')
+    compile project(':golemites-repository')
+    // compile 'org.eclipse.platform:org.eclipse.osgi:3.15.100'
+    // compile 'org.eclipse.platform:org.eclipse.osgi.util:3.5.300'
+    compile libraries.felix
+    compile libraries.slf4j_api
+    compile libraries.slf4j_simple
+    compile libraries.jackson_all
+    compile libraries.args4j
+    compile "ch.qos.logback:logback-core:1.1.7"
+    //runtimeOnly "ch.qos.logback:logback-classic:1.1.7"
+}
+
+// make sure all other jars are built:
+jar.dependsOn(':golemites-repository:jar')
+
+jar {
+    manifest {
+        attributes "Main-Class": "org.golemites.launcher.Launcher"
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    exclude('META-INF/DEPENDENCIES**')
+    exclude('META-INF/maven/**')
+    exclude('META-INF/LICENSE')
+    exclude('META-INF/NOTICE**')
+    exclude('OSGI-OPT/src/**')
+    exclude('module-info.class')
+    exclude('LICENSE')
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+test {
+    useJUnitPlatform()
+}
