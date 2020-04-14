@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id "io.freefair.lombok" version "4.1.6"
 }
 
 compileJava {
@@ -43,7 +44,7 @@ jar {
     }
 
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
     exclude('META-INF/DEPENDENCIES**')
@@ -51,6 +52,8 @@ jar {
     exclude('META-INF/LICENSE')
     exclude('META-INF/NOTICE**')
     exclude('OSGI-OPT/src/**')
+    exclude('module-info.class')
+    exclude('LICENSE')
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
