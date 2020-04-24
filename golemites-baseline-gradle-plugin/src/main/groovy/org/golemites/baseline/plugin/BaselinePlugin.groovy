@@ -38,7 +38,7 @@ class BaselinePlugin implements Plugin<Project> {
         project.getPlugins().apply(JavaLibraryPlugin.class)
         def extension = project.extensions.create("febo",FeboExtension, project)
 
-        Task makeVersionClassTask = project.tasks.create( 'generateStaticApi', GenerateStaticApiTask.class)
+        GenerateStaticApiTask makeVersionClassTask = project.tasks.create( 'generateStaticApi', GenerateStaticApiTask.class)
         //Task feboJar = project.tasks.create( 'feboJar', FeboJarTask.class)
 
         project.getConfigurations().maybeCreate("repository")

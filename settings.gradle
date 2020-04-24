@@ -2,9 +2,10 @@ rootProject.name = 'golemites'
 include 'golemites-api'
 include "golemites-core"
 include "golemites-repository"
-// include "golemites-autobundle"
+include "golemites-autobundle"
 include "golemites-osgi-launcher"
 include "golemites-gradle-plugin"
-// include "golemites-baseline-gradle-plugin"
+include "golemites-baseline-gradle-plugin"
 include "golemites-test-support"
 include "golemites-container-support"
+include "golemites-sdk"

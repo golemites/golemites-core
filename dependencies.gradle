@@ -2,6 +2,7 @@ def junitPlatformVersion = '1.5.2'
 def junitJupiterVersion = '5.5.2'
 def log4jVersion = '2.9.0'
 def integrityVersion = '0.4.0-SNAPSHOT'
+def tinybundlesVersion = '3.0.1-SNAPSHOT'
 def guavaVersion = '20.0'
 def lombokVersion = '1.18.4'
 def osgiVersion = '7.0.0'
@@ -55,7 +56,8 @@ rootProject.ext {
             javapoet : "com.squareup:javapoet:${javapoetVersion}",
             kubernetes_java : "io.kubernetes:client-java:${kubernetesJavaVersion}",
             jimfs : "com.google.jimfs:jimfs:${jimfsVersion}",
-            args4j : "args4j:args4j:${args4jVersion}"
+            args4j : "args4j:args4j:${args4jVersion}",
+            tinybundles    : "org.ops4j.pax.tinybundles:tinybundles:${tinybundlesVersion}",
 
     ]
 }

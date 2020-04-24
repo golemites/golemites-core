@@ -36,6 +36,7 @@ class GenerateStaticApiTask extends DefaultTask {
 
     def String packageName
 
+    @OutputDirectory
     def File generatedResourcesDir
 
     @OutputDirectory
