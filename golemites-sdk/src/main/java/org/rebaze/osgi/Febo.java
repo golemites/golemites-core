@@ -1,6 +1,9 @@
 package org.rebaze.osgi;
 
 import aQute.lib.io.IO;
+import org.golemites.api.DelayedBuilder;
+import org.golemites.api.Dependency;
+import org.golemites.api.Entrypoint;
 import org.ops4j.pax.tinybundles.core.TinyBundle;
 import org.ops4j.store.Handle;
 import org.ops4j.store.Store;
@@ -56,7 +59,7 @@ public class Febo implements AutoCloseable
         })
         Properties p = new Properties();
         p.put( "org.osgi.framework.bootdelegation","org.apache.log4j" );
-        p.put( "org.osgi.framework.system.packages.extra","org.tablerocket.febo.api" );
+        p.put( "org.osgi.framework.system.packages.extra","org.golemites.api" );
 
         Map<String,String> configuration = (Map) p;
         systemBundle = factory.newFramework(configuration);
@@ -99,8 +102,8 @@ public class Febo implements AutoCloseable
         {
             for (Dependency identifier : identifiers)
             {
-                blobindex.put( identifier.identity(),
-                    this.blobstore.store( identifier.location().toURL().openStream() ) );
+                blobindex.put( identifier.getIdentity(),
+                    this.blobstore.store( identifier.getLocation().toURL().openStream() ) );
             }
             return this;
         }
@@ -194,7 +197,7 @@ public class Febo implements AutoCloseable
             success = bounce();
             if (success)
             {
-                FeboEntrypoint entry = entrypoint( FeboEntrypoint.class );
+                Entrypoint entry = entrypoint( Entrypoint.class );
                 String version = systemBundle.getHeaders().get( Constants.BUNDLE_VERSION );
                 System.out.println("\u001B[36mBooted FEBO on Apache Felix " + version + " in " + Duration.between(t, Instant.now()).toMillis() + " ms.\u001B[0m \u001B[0m\r\n");
 
