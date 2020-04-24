@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <!--<statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />-->
+    <appender name="A1" class="ch.qos.logback.core.FileAppender">
+        <File>.golem.log</File>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-4r [%t] %-5p %c - %m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+    <appender name="A2" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-4r [%t] %-5p %c - %m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+    <root>
+        <appender-ref ref="A1"/>
+        <appender-ref ref="A2"/>
+    </root>
+</configuration>
+

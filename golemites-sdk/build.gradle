@@ -1,0 +1,45 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id "io.freefair.lombok" version "4.1.6"
+}
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.compilerArgs += '-parameters'
+}
+
+compileTestJava {
+		options.compilerArgs += '-parameters'
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations.compile.transitive = false
+
+dependencies {
+    compile project(':golemites-api')
+    compile project(':golemites-autobundle')
+    compile project(':golemites-core')
+    compile project(':golemites-repository')
+    compile libraries.felix
+    compile libraries.slf4j_api
+    compile libraries.slf4j_simple
+    compile libraries.jackson_all
+    compile libraries.args4j
+    compile "ch.qos.logback:logback-core:1.1.7"
+    compile libraries.tinybundles
+    //runtimeOnly "ch.qos.logback:logback-classic:1.1.7"
+    testCompile libraries.assertj
+    testCompile libraries.jupiter_api
+    testRuntime libraries.jupiter_engine
+    testCompileOnly libraries.apiguardian
+    testRuntimeOnly libraries.log4j_core
+}
+
+test {
+    useJUnitPlatform()
+}
