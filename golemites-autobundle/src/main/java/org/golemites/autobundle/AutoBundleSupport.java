@@ -249,13 +249,13 @@ public class AutoBundleSupport
         private Map<String, URL> findFlatResources() throws IOException
         {
             if (clazz != null) {
-                LOG.error("Collecting from anchor class " + clazz);
+                LOG.info("Collecting from anchor class " + clazz);
                 ContentCollector collector = selectCollector(clazz);
                 Map<String, URL> map = new HashMap<>();
                 collector.collect(map);
                 return map;
             }else if (root != null && root.isDirectory()){
-                LOG.error("Collecting from folder " + root.getAbsolutePath());
+                LOG.info("Collecting from folder " + root.getAbsolutePath());
 
                 ContentCollector collector = new CollectFromBase(root);
                 Map<String, URL> map = new HashMap<>();
