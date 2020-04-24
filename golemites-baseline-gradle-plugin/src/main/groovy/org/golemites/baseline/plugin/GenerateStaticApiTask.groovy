@@ -1,6 +1,5 @@
 package org.golemites.baseline.plugin
 
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.JavaFile
@@ -9,6 +8,7 @@ import com.squareup.javapoet.TypeSpec
 import org.golemites.baseline.plugin.resolver.ArtifactDescriptor
 import org.golemites.baseline.plugin.synth.FlatCopyMirror
 import org.golemites.baseline.plugin.synth.Mirror
+import org.golemites.repository.ClasspathRepositoryStore
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ResolvedArtifact
@@ -99,13 +99,14 @@ class GenerateStaticApiTask extends DefaultTask {
                         ad.name,
                         ad.version,
                         ad.classifier,
-                        ad.type
+                        ad.type,
+                        getNameFor(ad)
                     )
             )
             deps.add(rd)
         }
         platform.setDependencies(deps.toArray(new Dependency[deps.size()]))
-        mapper.writeValue(new File(generatedResourcesDir,BLOB_FILENAME),platform)
+        mapper.writeValue(new File(generatedResourcesDir, ClasspathRepositoryStore.BLOB_FILENAME),platform)
 
 
         // baseline api

@@ -24,6 +24,7 @@ repositories {
 
 dependencies {
     compile project(':golemites-api')
+    compile project(':golemites-repository')
     compile libraries.javapoet
 
     compile libraries.osgi_framework
